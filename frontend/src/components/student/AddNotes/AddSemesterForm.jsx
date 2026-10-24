@@ -1,0 +1,457 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  Calendar,
+  ArrowLeft,
+  ArrowRight,
+  Loader2,
+  PlusCircle,
+  AlertCircle,
+  RefreshCw,
+  CheckCircle2,
+  BookOpen
+} from 'lucide-react';
+import toast from 'react-hot-toast';
+import { academicApi } from '../../../services/academicApi';
+import {
+  setSelectedSemester,
+  addSemester,
+  setCurrentStep,
+  fetchSemestersByCourse
+} from '../../../store/slices/courseSlice';
+
+export const AddSemesterForm = () => {
+  const dispatch = useDispatch();
+  const { selectedCourse, selectedSemester, semesters, loading, error } = useSelector(
+    (state) => state.course
+  );
+
+  // Active semesters under currently selected course, sorted by semesterNumber
+  const activeSemesters = (semesters || [])
+    .filter((s) => s && s.isActive !== false)
+    .sort((a, b) => (a.semesterNumber || 0) - (b.semesterNumber || 0));
+
+  const [mode, setMode] = useState(() => (activeSemesters.length > 0 ? 'select' : 'create'));
+  const [hasAutoSwitched, setHasAutoSwitched] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [selectedSemesterId, setSelectedSemesterId] = useState(selectedSemester?._id || '');
+
+  // Form data for creating a new semester
+  const [formData, setFormData] = useState({
+    semesterNumber: selectedSemester?.semesterNumber || 1,
+    name: selectedSemester?.name || 'Semester 1',
+  });
+
+  const isMountedRef = useRef(true);
+  const currentCourseIdRef = useRef(selectedCourse?._id);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // Fetch shared catalog of semesters for the selected course with stale-response protection
+  useEffect(() => {
+    currentCourseIdRef.current = selectedCourse?._id;
+    if (selectedCourse?._id) {
+      dispatch(fetchSemestersByCourse(selectedCourse._id));
+    }
+  }, [dispatch, selectedCourse?._id]);
+
+  // Default mode and selection once semesters are loaded
+  useEffect(() => {
+    if (!hasAutoSwitched && activeSemesters.length > 0) {
+      if (!selectedSemester) {
+        setMode('select');
+        setSelectedSemesterId(activeSemesters[0]._id);
+      } else {
+        setSelectedSemesterId(selectedSemester._id);
+      }
+      setHasAutoSwitched(true);
+    }
+  }, [activeSemesters, hasAutoSwitched, selectedSemester]);
+
+  // Keep selectedSemesterId in sync if selectedSemester changes externally
+  useEffect(() => {
+    if (selectedSemester?._id) {
+      setSelectedSemesterId(selectedSemester._id);
+    }
+  }, [selectedSemester]);
+
+  // Auto-calculate next recommended semester number when switching to create mode
+  const handleSwitchToCreate = () => {
+    setMode('create');
+    const existingNums = activeSemesters.map((s) => s.semesterNumber || 0);
+    const maxNum = existingNums.length > 0 ? Math.max(...existingNums) : 0;
+    const nextNum = Math.min(Math.max(maxNum + 1, 1), 12);
+    setFormData({
+      semesterNumber: nextNum,
+      name: `Semester ${nextNum}`,
+    });
+  };
+
+  const handleSemesterNumberChange = (e) => {
+    const val = parseInt(e.target.value, 10);
+    const num = isNaN(val) ? '' : Math.max(1, Math.min(12, val));
+    setFormData((prev) => ({
+      ...prev,
+      semesterNumber: num,
+      name:
+        !prev.name || prev.name.startsWith('Semester ')
+          ? num ? `Semester ${num}` : ''
+          : prev.name,
+    }));
+  };
+
+  // Action 1: Select Existing Semester (Reuses existing database record, NEVER calls create API)
+  const handleSelectExisting = async (e) => {
+    if (e?.preventDefault) e.preventDefault();
+    if (!selectedCourse?._id) {
+      toast.error('Parent course missing. Please return to Step 1.');
+      dispatch(setCurrentStep(1));
+      return;
+    }
+
+    if (!selectedSemesterId) {
+      toast.error('Please choose a semester to continue');
+      return;
+    }
+
+    const sem = activeSemesters.find((s) => s._id === selectedSemesterId);
+    if (!sem) {
+      toast.error('Selected semester not found');
+      return;
+    }
+
+    dispatch(setSelectedSemester(sem));
+    dispatch(setCurrentStep(3));
+    toast.success(`Selected "${sem.name}"`);
+  };
+
+  // Action 2: Create New Semester (Submits only fields supported by backend schema)
+  const handleCreateSemester = async (e) => {
+    e.preventDefault();
+
+    if (!selectedCourse?._id) {
+      toast.error('Parent course missing. Please return to Step 1.');
+      dispatch(setCurrentStep(1));
+      return;
+    }
+
+    const num = Number(formData.semesterNumber);
+    if (!num || num < 1 || num > 12) {
+      toast.error('Semester number must be between 1 and 12');
+      return;
+    }
+
+    // Check if this semester number already exists in this course
+    const existingSameNumber = activeSemesters.find((s) => s.semesterNumber === num);
+    if (existingSameNumber) {
+      // Prompt user to reuse existing
+      toast(`Semester ${num} already exists in this course. Reusing existing record.`, {
+        icon: 'ℹ️',
+      });
+      dispatch(setSelectedSemester(existingSameNumber));
+      dispatch(setCurrentStep(3));
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const payload = {
+        semesterNumber: num,
+        name: formData.name.trim() || `Semester ${num}`,
+      };
+
+      const res = await academicApi.createSemester(selectedCourse._id, payload);
+      if (res && res.success && res.data) {
+        const returnedSemester = res.data;
+        toast.success(res.message || 'Semester saved successfully!');
+
+        // Update Redux state without duplicates
+        dispatch(addSemester(returnedSemester));
+        dispatch(setSelectedSemester(returnedSemester));
+
+        if (isMountedRef.current) {
+          dispatch(setCurrentStep(3));
+        }
+      } else {
+        throw new Error(res?.message || 'Failed to create semester');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Could not create semester. Please try again.');
+    } finally {
+      if (isMountedRef.current) {
+        setSubmitting(false);
+      }
+    }
+  };
+
+  // If no parent course is selected, block with clear recovery button
+  if (!selectedCourse) {
+    return (
+      <div className="bg-white border border-slate-200/90 p-8 text-center space-y-4 shadow-xs">
+        <AlertCircle className="w-10 h-10 text-amber-500 mx-auto" />
+        <div className="space-y-1">
+          <h3 className="text-base font-bold text-slate-900">No Course Selected</h3>
+          <p className="text-xs text-slate-500">
+            Please choose or create a course before configuring semesters.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => dispatch(setCurrentStep(1))}
+          className="px-5 py-2 text-xs font-semibold text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] rounded-xl transition-colors cursor-pointer inline-flex items-center gap-1.5"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Return to Step 1: Course Selection</span>
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white p-6 sm:p-8 space-y-6">
+      {/* Header with Mode Switcher */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+            Choose or Add Semester
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Specify the academic term or semester index for {selectedCourse.name}.
+          </p>
+        </div>
+
+        {/* Mode Switcher Tabs */}
+        <div className="inline-flex p-1 bg-slate-100 text-xs font-semibold self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setMode('select')}
+            className={`px-3.5 py-1.5 transition-all cursor-pointer flex items-center gap-1.5 ${
+              mode === 'select'
+                ? 'bg-white text-[var(--primary)] shadow-xs font-bold'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <span>Select Existing</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-slate-200/70 text-[10px] text-slate-700">
+              {activeSemesters.length}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={handleSwitchToCreate}
+            className={`px-3.5 py-1.5 transition-all cursor-pointer flex items-center gap-1.5 ${
+              mode === 'create'
+                ? 'bg-white text-[var(--primary)] shadow-xs font-bold'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <PlusCircle className="w-3.5 h-3.5" />
+            <span>+ Add New</span>
+          </button>
+        </div>
+      </div>
+
+      {/* MODE 1: Select Existing Semester from Shared Catalog */}
+      {mode === 'select' ? (
+        <form onSubmit={handleSelectExisting} className="space-y-5">
+          {/* Loading State */}
+          {loading && activeSemesters.length === 0 ? (
+            <div className="py-12 text-center space-y-3">
+              <Loader2 className="w-6 h-6 animate-spin text-[var(--primary)] mx-auto" />
+              <p className="text-xs text-slate-500">Loading semesters for {selectedCourse.name}...</p>
+            </div>
+          ) : error && activeSemesters.length === 0 ? (
+            /* Error & Retry State */
+            <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 space-y-2 text-xs">
+              <div className="flex items-center gap-2 font-bold">
+                <AlertCircle className="w-4 h-4" />
+                <span>Failed to load semesters</span>
+              </div>
+              <p>{error}</p>
+              <button
+                type="button"
+                onClick={() => dispatch(fetchSemestersByCourse(selectedCourse._id))}
+                className="inline-flex items-center gap-1 text-[var(--primary)] font-bold hover:underline cursor-pointer pt-1"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Retry</span>
+              </button>
+            </div>
+          ) : activeSemesters.length === 0 ? (
+            /* Empty State */
+            <div className="py-10 text-center border-2 border-dashed border-slate-200 rounded-xl space-y-3">
+              <Calendar className="w-8 h-8 text-slate-300 mx-auto" />
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-slate-700">
+                  No semesters configured for this course yet
+                </p>
+                <p className="text-xs text-slate-500">
+                  Add the first semester (e.g. Semester 1) to continue.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleSwitchToCreate}
+                className="px-4 py-2 text-xs font-semibold text-[var(--primary)] bg-[var(--primary-light)] hover:bg-[var(--primary-border)]/50 rounded-lg transition-colors cursor-pointer"
+              >
+                + Add Semester 1
+              </button>
+            </div>
+          ) : (
+            /* Semester Cards Selection */
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Select Existing Semester ({activeSemesters.length})
+                </label>
+                <span className="text-[11px] text-slate-400">Click a card to select</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {activeSemesters.map((s) => {
+                  const isSelected = selectedSemesterId === s._id;
+                  const semNum = s.semesterNumber || 1;
+                  const hasSubjectCount = typeof s.subjectCount === 'number';
+                  const hasNoteCount = typeof s.noteCount === 'number';
+
+                  return (
+                    <div
+                      key={s._id}
+                      onClick={() => setSelectedSemesterId(s._id)}
+                      onDoubleClick={() => handleSelectExisting()}
+                      className={`p-4 border rounded-none cursor-pointer transition-all flex flex-col justify-between space-y-3 group ${
+                        isSelected
+                          ? 'border-[var(--primary)] bg-[var(--primary-light)]/20 ring-1 ring-[var(--primary)] shadow-xs'
+                          : 'border-slate-200 bg-white hover:border-[var(--primary)] hover:bg-slate-50'
+                      }`}
+                    >
+                      {/* Semester Name & Info */}
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-bold text-sm text-slate-900 group-hover:text-[var(--primary)] transition-colors truncate">
+                          {s.name || `Semester ${semNum}`}
+                        </h4>
+                        {isSelected ? (
+                          <CheckCircle2 className="w-4 h-4 text-[var(--primary)] shrink-0" />
+                        ) : (
+                          <div className="w-4 h-4 rounded-full border border-slate-300 group-hover:border-[var(--primary)] shrink-0" />
+                        )}
+                      </div>
+
+                      {/* Metadata / Counts */}
+                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                        <span>{hasSubjectCount ? `${s.subjectCount} subjects` : 'Active Term'}</span>
+                        {hasNoteCount && <span>{s.noteCount} notes</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Form Actions */}
+          <div className="pt-4 flex items-center justify-between border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => dispatch(setCurrentStep(1))}
+              className="px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Course</span>
+            </button>
+
+            <button
+              type="submit"
+              disabled={!selectedSemesterId || loading || activeSemesters.length === 0}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer inline-flex items-center gap-2 shadow-xs"
+            >
+              <span>Continue to Subjects</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </form>
+      ) : (
+        /* MODE 2: Add New Semester (Submits supported fields to actual backend) */
+        <form onSubmit={handleCreateSemester} className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {/* Semester Number */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Semester Number (1 - 12) <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="number"
+                name="semesterNumber"
+                value={formData.semesterNumber}
+                onChange={handleSemesterNumberChange}
+                min={1}
+                max={12}
+                required
+                className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
+              />
+              <p className="text-[11px] text-slate-500">
+                Identifies term index in the academic structure.
+              </p>
+            </div>
+
+            {/* Semester Display Name */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Display Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g. Semester 1, 1st Year Autumn..."
+                maxLength={100}
+                className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
+              />
+              <p className="text-[11px] text-slate-500">
+                Optional custom label (defaults to "Semester {formData.semesterNumber || 1}").
+              </p>
+            </div>
+          </div>
+
+          {/* Form Actions */}
+          <div className="pt-4 flex items-center justify-between border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => dispatch(setCurrentStep(1))}
+              className="px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Course</span>
+            </button>
+
+            <button
+              type="submit"
+              disabled={submitting || !formData.semesterNumber}
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer inline-flex items-center gap-2 shadow-xs"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Saving Semester...</span>
+                </>
+              ) : (
+                <>
+                  <span>Create Semester & Proceed</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+};
+
+export default AddSemesterForm;

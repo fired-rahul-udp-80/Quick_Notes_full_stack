@@ -14,23 +14,23 @@ export const PdfLocked = ({
       onContextMenu={(e) => e.preventDefault()}
       className={`absolute inset-0 z-30 flex items-center justify-center p-4 sm:p-6 backdrop-blur-md bg-slate-900/60 select-none animate-in fade-in duration-200 ${className}`}
     >
-      <div className="bg-white border border-slate-200 shadow-2xl max-w-md w-full p-6 sm:p-8 text-center space-y-5 relative overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl max-w-md w-full p-6 sm:p-8 text-center space-y-5 relative overflow-hidden">
         {/* Subtle accent bar at top */}
         <div className="absolute top-0 inset-x-0 h-1.5 bg-linear-to-r from-amber-500 via-rose-500 to-indigo-600" />
 
         {/* Lock Icon */}
-        <div className="mx-auto w-16 h-16 bg-amber-50 border-2 border-amber-200 flex items-center justify-center text-amber-600 shadow-inner">
+        <div className="mx-auto w-16 h-16 bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-200 dark:border-amber-800/60 flex items-center justify-center text-amber-600 dark:text-amber-400 shadow-inner">
           <Lock className="w-8 h-8" />
         </div>
 
         {/* Header Text */}
         <div className="space-y-1.5">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">
-            <ShieldAlert className="w-3.5 h-3.5 text-amber-700" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+            <ShieldAlert className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
             <span>Document Locked</span>
           </span>
 
-          <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+          <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
             Enroll to Unlock Full PDF
           </h3>
 
@@ -38,14 +38,14 @@ export const PdfLocked = ({
         </div>
 
         {/* Key Features / Benefits */}
-        <div className="bg-slate-50 border border-slate-200 p-3.5 text-left text-xs space-y-2 text-slate-700 font-medium">
+        <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 p-3.5 text-left text-xs space-y-2 text-slate-700 dark:text-slate-300 font-medium">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>Complete page access & high-res diagrams</span>
           </div>
           
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>Free access to all {subjectName} materials</span>
           </div>
         </div>

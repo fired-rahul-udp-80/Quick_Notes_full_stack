@@ -150,11 +150,11 @@ export const UploadNoteForm = () => {
   // Guard: If parent hierarchy missing
   if (!selectedCourse || !selectedSemester || !selectedSubject) {
     return (
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-8 text-center space-y-4 shadow-xs">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-8 text-center space-y-4 shadow-xs">
         <AlertCircle className="w-10 h-10 text-amber-500 mx-auto" />
         <div className="space-y-1">
-          <h3 className="text-base font-bold text-slate-900">Curriculum Incomplete</h3>
-          <p className="text-xs text-slate-500">
+          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Curriculum Incomplete</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Please select Course, Semester, and Subject before uploading notes.
           </p>
         </div>
@@ -171,13 +171,13 @@ export const UploadNoteForm = () => {
   }
 
   return (
-    <div className="bg-white p-6 sm:p-8 space-y-4">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 space-y-4 shadow-xs">
       {/* Header */}
-      <div className="pb-5 border-b border-slate-100">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+      <div className="pb-5 border-b border-slate-100 dark:border-slate-800">
+        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
           Upload Notes for {selectedSubject.name}
         </h2>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
           Upload PDF lecture notes, handwritten scans, summaries, or past questions.
         </p>
       </div>
@@ -186,7 +186,7 @@ export const UploadNoteForm = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Document File Upload Drop Area */}
         <div className="space-y-2">
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
             Note Document <span className="text-rose-500">*</span>
           </label>
 
@@ -195,7 +195,7 @@ export const UploadNoteForm = () => {
               {!file ? (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-slate-200 hover:border-[var(--primary)] bg-slate-50 hover:bg-[var(--primary-light)]/20 p-6 sm:p-8 text-center cursor-pointer transition-all space-y-3"
+                  className="border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-[var(--primary)] dark:hover:border-[var(--primary)] bg-slate-50 dark:bg-slate-800/40 hover:bg-[var(--primary-light)]/20 dark:hover:bg-indigo-950/30 p-6 sm:p-8 text-center cursor-pointer transition-all space-y-3"
                 >
                   <input
                     ref={fileInputRef}
@@ -204,29 +204,29 @@ export const UploadNoteForm = () => {
                     onChange={handleFileChange}
                     className="hidden"
                   />
-                  <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 text-[var(--primary)] mx-auto flex items-center justify-center shadow-xs">
+                  <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[var(--primary)] mx-auto flex items-center justify-center shadow-xs">
                     <FileUp className="w-6 h-6" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-semibold text-slate-800">
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                       Click to browse or drag and drop your note document
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       Supports PDF, DOC, DOCX, PNG, JPG (up to 50MB)
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
                       <FileText className="w-5 h-5" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                      <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
                         {file.name}
                       </p>
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
                         {(file.size / (1024 * 1024)).toFixed(2)} MB • Ready for upload
                       </p>
                     </div>
@@ -234,7 +234,7 @@ export const UploadNoteForm = () => {
                   <button
                     type="button"
                     onClick={handleRemoveFile}
-                    className="p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-white transition-colors cursor-pointer"
+                    className="p-1 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors cursor-pointer"
                     title="Remove File"
                   >
                     <X className="w-4 h-4" />
@@ -259,7 +259,7 @@ export const UploadNoteForm = () => {
                 value={fileUrlInput}
                 onChange={(e) => setFileUrlInput(e.target.value)}
                 placeholder="https://example.com/document.pdf or Cloudinary URL"
-                className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
+                className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
               />
               <div className="flex justify-end">
                 <button
@@ -278,7 +278,7 @@ export const UploadNoteForm = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {/* Note Title */}
           <div className="space-y-1.5 sm:col-span-2">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               Note Title <span className="text-rose-500">*</span>
             </label>
             <input
@@ -289,20 +289,20 @@ export const UploadNoteForm = () => {
               placeholder="e.g. Complete Unit 1 Handwritten Lecture Notes"
               maxLength={200}
               required
-              className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
+              className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
             />
           </div>
 
           {/* Organization Type */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               Organization Structure
             </label>
             <select
               name="organizationType"
               value={formData.organizationType}
               onChange={handleInputChange}
-              className="w-full px-4 py-2.5 border border-slate-200 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all cursor-pointer"
+              className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all cursor-pointer"
             >
               <option value="GENERAL">General / Entire Subject</option>
               <option value="UNIT">Unit / Module Specific</option>
@@ -311,14 +311,14 @@ export const UploadNoteForm = () => {
 
           {/* Visibility */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               Visibility & Privacy
             </label>
             <select
               name="visibility"
               value={formData.visibility}
               onChange={handleInputChange}
-              className="w-full px-4 py-2.5 border border-slate-200 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all cursor-pointer"
+              className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all cursor-pointer"
             >
               <option value="PUBLIC">Public — Accessible to all students</option>
               <option value="PRIVATE">Private — Only visible to me</option>
@@ -328,7 +328,7 @@ export const UploadNoteForm = () => {
           {/* Conditional: Unit Name if UNIT chosen */}
           {formData.organizationType === 'UNIT' && (
             <div className="space-y-1.5 sm:col-span-2">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 Unit / Module Name
               </label>
               <input
@@ -337,14 +337,14 @@ export const UploadNoteForm = () => {
                 value={formData.unitName}
                 onChange={handleInputChange}
                 placeholder="e.g. Unit 1: Introduction to Data Structures"
-                className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
+                className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
               />
             </div>
           )}
 
           {/* Description */}
           <div className="space-y-1.5 sm:col-span-2">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               Description(Optional)
             </label>
             <textarea
@@ -353,13 +353,13 @@ export const UploadNoteForm = () => {
               onChange={handleInputChange}
               rows={3}
               placeholder="Summary of lecture notes, key revision topics, tips for exams..."
-              className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all resize-none"
+              className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all resize-none"
             />
           </div>
 
           {/* Tags */}
           <div className="space-y-1.5 sm:col-span-2">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               Search Tags (Comma separated)
             </label>
             <input
@@ -368,17 +368,17 @@ export const UploadNoteForm = () => {
               value={formData.tags}
               onChange={handleInputChange}
               placeholder="e.g. exam, formula-sheet, midterm, handwritten"
-              className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
+              className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
             />
           </div>
         </div>
 
         {/* Form Actions */}
-        <div className="pt-4 flex items-center justify-between border-t border-slate-100">
+        <div className="pt-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
           <button
             type="button"
             onClick={() => dispatch(setCurrentStep(3))}
-            className="px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+            className="px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer inline-flex items-center gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Subject</span>

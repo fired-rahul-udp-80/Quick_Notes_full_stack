@@ -57,18 +57,18 @@ export const ExploreNoteCard = ({
   return (
     <div
       onClick={() => onSelectNote && onSelectNote(note)}
-      className="relative bg-white border border-slate-200/90 hover:border-primary p-0 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between group overflow-hidden select-none"
+      className="relative bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-primary dark:hover:border-primary p-0 shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between group overflow-hidden select-none"
     >
       {/* Dog-eared PDF paper fold at top-right */}
       <div className="absolute top-0 right-0 w-7 h-7 overflow-hidden z-20 pointer-events-none">
-        <div className="w-10 h-10 bg-slate-100 border-b border-l border-slate-300 shadow-xs -rotate-45 transform origin-bottom-left group-hover:bg-primary-hover group-hover:border-primary-hover transition-colors" />
+        <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 border-b border-l border-slate-300 dark:border-slate-700 shadow-xs -rotate-45 transform origin-bottom-left group-hover:bg-primary-hover group-hover:border-primary-hover transition-colors" />
       </div>
 
       {/* Stacked Sheet Shadow Effect (bottom edge paper stack) */}
-      <div className="absolute inset-x-2 -bottom-1 h-1 bg-slate-200/80 border border-slate-300/60 -z-10 rounded-b-xs" />
+      <div className="absolute inset-x-2 -bottom-1 h-1 bg-slate-200/80 dark:bg-slate-800/80 border border-slate-300/60 dark:border-slate-700/60 -z-10 rounded-b-xs" />
 
       {/* ================= 1. PDF TOP HEADER BAR ================= */}
-      <div className="p-4 pb-3 border-b border-slate-100 bg-linear-to-r from-slate-50 via-white to-slate-50">
+      <div className="p-4 pb-3 border-b border-slate-100 dark:border-slate-800 bg-linear-to-r from-slate-50 via-white to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         <div className="flex items-center justify-between gap-2 pr-5">
           {/* PDF Format Badge & Owner Tag */}
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -78,15 +78,15 @@ export const ExploreNoteCard = ({
             </span>
 
             {isOwner && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/60">
                 <span>My Note</span>
               </span>
             )}
           </div>
           {isEnrolled && !isOwner && (
             <span className="inline-flex uppercase items-center gap-1 px-2 py-0.5 text-[10px] font-bold text-white bg-green-600">
-                <span>Enrolled</span>
-              </span>
+              <span>Enrolled</span>
+            </span>
           )}
           {/* Bookmark Button - Hidden completely for own notes */}
           {!isOwner && onBookmarkToggle && !isEnrolled && (
@@ -99,8 +99,8 @@ export const ExploreNoteCard = ({
               title={isSaved ? 'Remove from saved' : 'Save note'}
               className={`p-1.5 transition-colors cursor-pointer border ${
                 isSaved
-                  ? 'border-red-200 bg-red-50 text-red-600'
-                  : 'border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-100'
+                  ? 'border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400'
+                  : 'border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} />
@@ -109,36 +109,36 @@ export const ExploreNoteCard = ({
         </div>
 
         {/* Academic Hierarchy Pills */}
-        <div className="mt-2.5 flex items-center gap-2 text-[11px] text-slate-500 font-medium">
-          <span className="px-2 py-0.5 bg-slate-100 text-slate-700 font-semibold truncate max-w-[150px]">
+        <div className="mt-2.5 flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+          <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold truncate max-w-[150px]">
             {courseName}
           </span>
-          <span className="text-slate-300">•</span>
-          <span className="text-slate-600">Sem {semesterNumber}</span>
-          <span className="text-slate-300">•</span>
-          <span className="text-primary-dark font-semibold truncate max-w-[130px]">
+          <span className="text-slate-300 dark:text-slate-600">•</span>
+          <span className="text-slate-600 dark:text-slate-400">Sem {semesterNumber}</span>
+          <span className="text-slate-300 dark:text-slate-600">•</span>
+          <span className="text-primary-dark dark:text-indigo-400 font-semibold truncate max-w-[130px]">
             {subjectName}
           </span>
         </div>
       </div>
 
       {/* ================= 2. PDF PAGE PREVIEW BODY (DOCUMENT SHEET LOOK) ================= */}
-      <div className="p-4 pt-3 space-y-3 flex-1 bg-white">
+      <div className="p-4 pt-3 space-y-3 flex-1 bg-white dark:bg-slate-900">
         {/* Document Title */}
-        <h4 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-primary-dark transition-colors line-clamp-2 leading-snug">
+        <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary-dark dark:group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug">
           {note?.title}
         </h4>
 
         {/* Realistic PDF Document Mock Preview Canvas */}
-        <div className="relative border border-slate-200/80 bg-slate-50/60 p-3.5 space-y-2 group-hover:border-primary-hover transition-colors">
+        <div className="relative border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/50 p-3.5 space-y-2 group-hover:border-primary-hover transition-colors">
           {/* Watermark/Subject hint at top */}
-          <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono border-b border-slate-200/60 pb-1">
-            <span className="truncate uppercase font-bold text-slate-500">{subjectName}</span>
+          <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 font-mono border-b border-slate-200/60 dark:border-slate-700/60 pb-1">
+            <span className="truncate uppercase font-bold text-slate-500 dark:text-slate-400">{subjectName}</span>
           </div>
 
           {/* Description / Summary text simulating document content */}
           {note?.description ? (
-            <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed font-sans">
+            <p className="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed font-sans">
               {note.description}
             </p>
           ) : null}
@@ -150,7 +150,7 @@ export const ExploreNoteCard = ({
             {note.tags.slice(0, 3).map((tag, i) => (
               <span
                 key={i}
-                className="text-[10px] text-slate-600 bg-slate-100/90 px-1.5 py-0.5 border border-slate-200/60 truncate max-w-[100px]"
+                className="text-[10px] text-slate-600 dark:text-slate-300 bg-slate-100/90 dark:bg-slate-800 px-1.5 py-0.5 border border-slate-200/60 dark:border-slate-700 truncate max-w-[100px]"
               >
                 #{tag}
               </span>
@@ -160,11 +160,11 @@ export const ExploreNoteCard = ({
       </div>
 
       {/* ================= 3. PDF FOOTER & ACTION BAR ================= */}
-      <div className="px-4 py-3 bg-slate-50/90 border-t border-slate-100 flex items-center justify-between gap-2">
+      <div className="px-4 py-3 bg-slate-50/90 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
         {/* Author / Stats */}
         <div className="min-w-0 flex flex-col text-[11px]">
-          <span className="text-slate-400 text-[10px]">By</span>
-          <span className="font-semibold text-slate-800 truncate max-w-[120px]">
+          <span className="text-slate-400 dark:text-slate-500 text-[10px]">By</span>
+          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[120px]">
             {ownerName}
           </span>
         </div>

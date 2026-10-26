@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { Eye, EyeOff } from 'lucide-react';
 import { Logo } from '../../components/common/Logo';
+import { GridBackground } from '../../components/common/GridBackground';
 import { authApi } from '../../services/authApi';
 import { setCredentials, setLoading } from '../../store/slices/authSlice';
 
@@ -72,15 +73,15 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white border border-slate-300 p-8 space-y-6">
+    <GridBackground isFullPage showGlow={true} mask="radial" className="flex items-center justify-center p-4">
+      <div className="w-[100%] md:min-w-lg bg-white/95 dark:bg-[#0d0e13]/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 p-8 space-y-6 shadow-2xl transition-all">
         {/* Brand Header */}
         <div className="text-center space-y-1">
           <div className="inline-block mb-1">
             <Logo size="md" onClick={() => navigate('/')} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Welcome back</h2>
-          <p className="text-xs text-slate-500">Sign in to your student account to continue</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Welcome back</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Sign in to your student account to continue</p>
         </div>
 
         {/* Login Form */}
@@ -115,9 +116,9 @@ export const LoginPage = () => {
                       aria-label="toggle password visibility"
                     >
                       {showPassword ? (
-                        <EyeOff size={18} className="text-slate-600" />
+                        <EyeOff size={18} className="text-slate-600 dark:text-slate-300" />
                       ) : (
-                        <Eye size={18} className="text-slate-500" />
+                        <Eye size={18} className="text-slate-400 dark:text-slate-500" />
                       )}
                     </IconButton>
                   </InputAdornment>
@@ -133,15 +134,15 @@ export const LoginPage = () => {
                   size="small"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  sx={{ color: '#4f46e5', '&.Mui-checked': { color: '#4f46e5' } }}
+                  sx={{ color: 'var(--primary)', '&.Mui-checked': { color: 'var(--primary)' } }}
                 />
               }
-              label={<span className="text-xs text-slate-600">Remember me</span>}
+              label={<span className="text-xs text-slate-600 dark:text-slate-300">Remember me</span>}
             />
 
             <Link
               to="/forgot-password"
-              className="text-indigo-600 hover:text-primary-dark font-semibold"
+              className="text-primary dark:text-yellow-300 hover:underline font-semibold"
             >
               Forgot password?
             </Link>
@@ -153,12 +154,12 @@ export const LoginPage = () => {
             variant="contained"
             disabled={isLoading}
             sx={{
-              backgroundColor: 'bg-primary',
-              '&:hover': { backgroundColor: 'bg-primary-dark' },
+              backgroundColor: 'var(--primary)',
+              '&:hover': { backgroundColor: 'var(--primary-hover)' },
+              color: '#ffffff',
               textTransform: 'none',
               fontWeight: 600,
               padding: '9px 16px',
-
             }}
           >
             {isLoading ? (
@@ -170,14 +171,14 @@ export const LoginPage = () => {
         </form>
 
         {/* Footer Link */}
-        <p className="text-center text-xs text-slate-500">
+        <p className="text-center text-xs text-slate-500 dark:text-slate-400">
           Don't have an account?{' '}
-          <Link to="/signup" className="text-indigo-600 hover:text-indigo-700 font-semibold">
+          <Link to="/signup" className="text-primary dark:text-yellow-300 hover:underline font-semibold">
             Create account
           </Link>
         </p>
       </div>
-    </div>
+    </GridBackground>
   );
 };
 

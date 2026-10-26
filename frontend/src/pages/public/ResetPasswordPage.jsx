@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import { Eye, EyeOff, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { Logo } from '../../components/common/Logo';
+import { GridBackground } from '../../components/common/GridBackground';
 import { authApi } from '../../services/authApi';
 import {toast} from "react-hot-toast"
 import { setLoading } from '../../store/slices/authSlice';
@@ -91,17 +92,17 @@ export const ResetPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white border border-slate-300 p-8 space-y-6 ">
+    <GridBackground isFullPage showGlow={true} mask="radial" className="flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white/95 dark:bg-[#0d0e13]/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 p-8 space-y-6 shadow-2xl transition-all">
         {/* Brand Header */}
         <div className="text-center space-y-1">
           <div className="inline-block mb-1">
             <Logo size="md" onClick={() => navigate('/')} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             {step === 1 ? 'Verify Reset Code' : 'Set New Password'}
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             {step === 1
               ? 'Enter the 6-digit code sent to your email'
               : 'Choose a strong new password for your account'}
@@ -118,7 +119,6 @@ export const ResetPasswordPage = () => {
               value={formData.email}
               onChange={(e)=>setFormData(prev=>({...prev, email:e.target.value}))}
               placeholder="student@niu.edu.in"
-               
             />
 
             <TextField
@@ -140,15 +140,16 @@ export const ResetPasswordPage = () => {
               variant="contained"
               disabled={isLoading}
               sx={{
-                backgroundColor: '#4f46e5',
-                '&:hover': { backgroundColor: '#4338ca' },
+                backgroundColor: 'var(--primary)',
+                '&:hover': { backgroundColor: 'var(--primary-hover)' },
+                color: '#ffffff',
                 textTransform: 'none',
                 fontWeight: 600,
                 padding: '9px 16px',
                 borderRadius: '10px',
               }}
             >
-              {isLoading ?  "Verifing Code..." : "Verify Code" }
+              {isLoading ?  "Verifying Code..." : "Verify Code" }
             </Button>
           </form>
         )}
@@ -185,7 +186,6 @@ export const ResetPasswordPage = () => {
               type={showPassword ? 'text' : 'password'}
               value={formData.confirmPassword}
               onChange={(e)=>setFormData(prev=>({...prev, confirmPassword:e.target.value}))}
-              
             />
 
             <Button
@@ -194,15 +194,16 @@ export const ResetPasswordPage = () => {
               variant="contained"
               disabled={isLoading}
               sx={{
-                backgroundColor: '#4f46e5',
-                '&:hover': { backgroundColor: '#4338ca' },
+                backgroundColor: 'var(--primary)',
+                '&:hover': { backgroundColor: 'var(--primary-hover)' },
+                color: '#ffffff',
                 textTransform: 'none',
                 fontWeight: 600,
                 padding: '9px 16px',
                 borderRadius: '10px',
               }}
             >
-              {isLoading ? "Reseting your password..." : "Reset Password"}
+              {isLoading ? "Resetting your password..." : "Reset Password"}
             </Button>
           </form>
         )}
@@ -211,14 +212,14 @@ export const ResetPasswordPage = () => {
         <div className="text-center pt-1">
           <Link
             to="/login"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-yellow-300 transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Login</span>
           </Link>
         </div>
       </div>
-    </div>
+    </GridBackground>
   );
 };
 

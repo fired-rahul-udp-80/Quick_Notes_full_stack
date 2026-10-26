@@ -317,42 +317,24 @@ const getMyNotes = async (req, res) => {
 const getPublicNotes = async (req, res) => {
   try {
     const { page, limit, skip, sort } = parsePagination(req.query);
-    const { course, semester, subject, fileType, visibility: visibilityQuery, search, q, sortBy } = req.query;
+    const {
+      course,
+      semester,
+      subject,
+      fileType,
+      visibility: visibilityQuery,
+      search,
+      q,
+      sortBy,
+      all
+    } = req.query;
 
     const filter = {};
 
-    // Determine notes accessible to the requesting user
-    let accessOrConditions = [{ visibility: 'PUBLIC', status: 'PUBLISHED' }];
-    if (req.user) {
-      const userId = req.user.userId || req.user.id;
-      if (req.user.role === 'ADMIN') {
-        accessOrConditions = [{ status: { $ne: 'ARCHIVED' } }];
-      } else {
-        accessOrConditions.push({ owner: userId, status: { $ne: 'ARCHIVED' } });
-        const enrollments = await NoteEnrollment.find({
-          student: userId,
-          status: 'ACTIVE'
-        }).select('course').lean();
-        const enrolledCourseIds = enrollments.map((e) => e.course);
-        if (enrolledCourseIds.length > 0) {
-          accessOrConditions.push({
-            visibility: 'ENROLLED',
-            status: 'PUBLISHED',
-            course: { $in: enrolledCourseIds }
-          });
-        }
-      }
-    }
+    // Allow exploring notes across all users (explore catalog), excluding ARCHIVED notes
+    filter.status = { $ne: 'ARCHIVED' };
 
-    filter.$and = [{ $or: accessOrConditions }];
-
-    // Non-admin users must never see PENDING, REJECTED, or ARCHIVED notes unless they own them
-    if (!req.user || req.user.role !== 'ADMIN') {
-      filter.status = req.user
-        ? { $in: ['PUBLISHED', 'PENDING', 'REJECTED'] } // owner can see their own statuses
-        : 'PUBLISHED';
-    }
-
+    // If explicit visibility is filtered by client query (e.g., ?visibility=PUBLIC)
     if (visibilityQuery && ['PUBLIC', 'ENROLLED', 'PRIVATE'].includes(visibilityQuery.toUpperCase())) {
       filter.visibility = visibilityQuery.toUpperCase();
     }
@@ -390,16 +372,20 @@ const getPublicNotes = async (req, res) => {
       resolvedSort = { saveCount: -1 };
     }
 
+    const queryBuilder = Note.find(filter)
+      .populate('owner', 'name email')
+      .populate('course', 'name slug courseCode isPublished isActive')
+      .populate('semester', 'name semesterNumber')
+      .populate('subject', 'name slug subjectCode')
+      .sort(resolvedSort);
+
+    // If all === 'true' (used by Explore catalog), do not apply pagination limit
+    if (all !== 'true') {
+      queryBuilder.skip(skip).limit(limit);
+    }
+
     const [notes, total] = await Promise.all([
-      Note.find(filter)
-        .populate('owner', 'name')
-        .populate('course', 'name slug courseCode isPublished isActive')
-        .populate('semester', 'name semesterNumber')
-        .populate('subject', 'name slug subjectCode')
-        .sort(resolvedSort)
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+      queryBuilder.lean(),
       Note.countDocuments(filter)
     ]);
 
@@ -408,7 +394,7 @@ const getPublicNotes = async (req, res) => {
       count: notes.length,
       total,
       page,
-      totalPages: Math.ceil(total / limit) || 1,
+      totalPages: all === 'true' ? 1 : Math.ceil(total / limit) || 1,
       data: notes
     });
   } catch (error) {

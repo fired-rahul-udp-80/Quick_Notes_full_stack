@@ -30,7 +30,9 @@ import {
   RotateCcw,
   Edit3,
   Loader2,
+  RefreshCw,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 // Progressive flow: Course → Semester → Subject → Upload Note
 const STEPS = [
@@ -136,20 +138,24 @@ export const AddCoursePage = () => {
 
               // Step C: Load subjects for the matched semester
               let matchedSubject = null;
-              if (subParam) {
+              const editSubId = params.get('editSubjectId');
+              if (subParam || editSubId) {
                 const subAction = await dispatch(fetchSubjectsBySemester(matchedSemester._id));
                 const subList = subAction.payload || [];
 
                 if (!isMounted) return;
 
-                const cleanSub = decodeURIComponent(subParam).trim().toLowerCase();
+                const cleanSub = subParam ? decodeURIComponent(subParam).trim().toLowerCase() : '';
                 matchedSubject = subList.find(
                   (sub) =>
                     sub &&
-                    (sub._id === subParam ||
-                      (sub.subjectCode && sub.subjectCode.toLowerCase() === cleanSub) ||
-                      (sub.name && sub.name.toLowerCase() === cleanSub) ||
-                      (sub.slug && sub.slug.toLowerCase() === cleanSub))
+                    (sub._id === editSubId ||
+                      (cleanSub && (
+                        sub._id === subParam ||
+                        (sub.subjectCode && sub.subjectCode.toLowerCase() === cleanSub) ||
+                        (sub.name && sub.name.toLowerCase() === cleanSub) ||
+                        (sub.slug && sub.slug.toLowerCase() === cleanSub)
+                      )))
                 );
 
                 if (matchedSubject) {
@@ -252,6 +258,31 @@ export const AddCoursePage = () => {
     setSearchParams({ step: '1' }, { replace: true });
   };
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.allSettled([
+        dispatch(fetchAllCourses()),
+        dispatch(fetchMyCourses()),
+        selectedCourse?._id ? dispatch(fetchSemestersByCourse(selectedCourse._id)) : Promise.resolve(),
+        selectedSemester?._id ? dispatch(fetchSubjectsBySemester(selectedSemester._id)) : Promise.resolve(),
+      ]);
+      toast.success('Curriculum catalog refreshed');
+    } catch (err) {
+      toast.error('Failed to refresh curriculum');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleAppRefresh = () => handleRefresh();
+    window.addEventListener('app:refresh', handleAppRefresh);
+    return () => window.removeEventListener('app:refresh', handleAppRefresh);
+  }, [selectedCourse?._id, selectedSemester?._id]);
+
   const handleEditCurriculum = () => {
     dispatch(setIsCompleted(false));
     dispatch(setCurrentStep(3));
@@ -268,12 +299,35 @@ export const AddCoursePage = () => {
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
-      {/* Breadcrumb Navigation */}
-      <Breadcrumb
-        items={[
-          { label: 'Add Academic Curriculum' },
-        ]}
-      />
+      {/* Top Header & Breadcrumb Navigation */}
+      <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800 flex-wrap gap-2">
+        <Breadcrumb
+          items={[
+            { label: 'Add Academic Curriculum' },
+          ]}
+        />
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-[var(--primary)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+            title="Refresh courses, semesters and subjects"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-[var(--primary)]' : ''}`} />
+            <span>Refresh</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleReset}
+            className="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 bg-slate-100 dark:bg-slate-800 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5"
+            title="Reset form"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Reset</span>
+          </button>
+        </div>
+      </div>
 
       {/* Stepper Progress Bar (Circular Dashed Stepper with Global Primary Theme #8B5CF6) */}
       <div>
@@ -297,10 +351,10 @@ export const AddCoursePage = () => {
                   <div
                     className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-all duration-300 ${
                       isActive
-                        ? 'border-2 border-[var(--primary)] bg-[var(--primary-light)] text-[var(--primary)] ring-4 ring-[var(--primary)]/20'
+                        ? 'border-2 border-[var(--primary)] bg-[var(--primary-light)] dark:bg-indigo-950/60 text-[var(--primary)] dark:text-indigo-400 ring-4 ring-[var(--primary)]/20'
                         : isPassed
                         ? 'border-2 border-[var(--primary)] bg-[var(--primary)] text-white shadow-xs'
-                        : 'border border-slate-200 bg-slate-50 text-slate-400'
+                        : 'border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 text-slate-400 dark:text-slate-500'
                     }`}
                   >
                     {isPassed ? (
@@ -314,10 +368,10 @@ export const AddCoursePage = () => {
                   <span
                     className={`mt-2.5 sm:mt-3 text-center text-[11px] sm:text-xs md:text-sm transition-colors max-w-[85px] sm:max-w-[120px] leading-snug ${
                       isActive
-                        ? 'text-[var(--primary-dark)] font-bold'
+                        ? 'text-[var(--primary-dark)] dark:text-indigo-400 font-bold'
                         : isPassed
-                        ? 'text-slate-800 font-semibold'
-                        : 'text-slate-400 font-medium'
+                        ? 'text-slate-800 dark:text-slate-200 font-semibold'
+                        : 'text-slate-400 dark:text-slate-500 font-medium'
                     }`}
                   >
                     {step.title}
@@ -331,7 +385,7 @@ export const AddCoursePage = () => {
                       className={`border-t-2 border-dashed transition-colors duration-300 ${
                         currentStep > step.id || isCompleted
                           ? 'border-[var(--primary)]'
-                          : 'border-slate-200'
+                          : 'border-slate-200 dark:border-slate-800'
                       }`}
                     />
                   </div>
@@ -344,15 +398,15 @@ export const AddCoursePage = () => {
 
       {/* Dynamic Hierarchy Path Display */}
       {(selectedCourse || selectedSemester || selectedSubject) && (
-        <div className="flex items-center gap-1.5 text-xs text-slate-500 overflow-x-auto">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 overflow-x-auto">
+          <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0">
             Selected Hierarchy:
           </span>
 
           {selectedCourse && (
             <button
               onClick={() => handleStepClick(1)}
-              className="hover:text-[var(--primary)] hover:underline font-semibold text-slate-800 cursor-pointer transition-colors shrink-0 truncate max-w-[200px]"
+              className="hover:text-[var(--primary)] hover:underline font-semibold text-slate-800 dark:text-slate-200 cursor-pointer transition-colors shrink-0 truncate max-w-[200px]"
               title={selectedCourse.name}
             >
               {selectedCourse.name}
@@ -361,10 +415,10 @@ export const AddCoursePage = () => {
 
           {selectedSemester && (
             <>
-              <span className="text-slate-300 shrink-0">/</span>
+              <span className="text-slate-300 dark:text-slate-600 shrink-0">/</span>
               <button
                 onClick={() => handleStepClick(2)}
-                className="hover:text-[var(--primary)] hover:underline font-semibold text-slate-800 cursor-pointer transition-colors shrink-0 truncate max-w-[180px]"
+                className="hover:text-[var(--primary)] hover:underline font-semibold text-slate-800 dark:text-slate-200 cursor-pointer transition-colors shrink-0 truncate max-w-[180px]"
                 title={selectedSemester.name}
               >
                 {selectedSemester.name}
@@ -374,10 +428,10 @@ export const AddCoursePage = () => {
 
           {selectedSubject && (
             <>
-              <span className="text-slate-300 shrink-0">/</span>
+              <span className="text-slate-300 dark:text-slate-600 shrink-0">/</span>
               <button
                 onClick={() => handleStepClick(3)}
-                className="hover:text-[var(--primary)] hover:underline font-semibold text-slate-800 cursor-pointer transition-colors shrink-0 truncate max-w-[180px]"
+                className="hover:text-[var(--primary)] hover:underline font-semibold text-slate-800 dark:text-slate-200 cursor-pointer transition-colors shrink-0 truncate max-w-[180px]"
                 title={selectedSubject.name}
               >
                 {selectedSubject.name}
@@ -389,16 +443,16 @@ export const AddCoursePage = () => {
 
       {/* 3-Step Completion / Review State */}
       {isCompleted ? (
-        <div className="bg-white rounded-2xl border border-emerald-200 p-8 shadow-xs text-center space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center shadow-xs">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-emerald-200 dark:border-emerald-800/50 p-8 shadow-xs text-center space-y-6">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center shadow-xs">
             <CheckCircle2 className="w-8 h-8" />
           </div>
 
           <div className="space-y-2 max-w-lg mx-auto">
-            <h2 className="text-2xl font-extrabold text-slate-900">
+            <h2 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
               Curriculum Setup Completed!
             </h2>
-            <p className="text-sm text-slate-500 leading-relaxed">
+            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
               Your Course, Semester, and Subject selections have been linked and persisted to your student workspace.
             </p>
           </div>

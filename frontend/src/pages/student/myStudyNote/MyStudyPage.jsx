@@ -12,8 +12,12 @@ import {
   Calendar,
   Plus,
   Loader2,
-  FileText
+  FileText,
+  Globe,
+  Lock,
+  RefreshCw
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export const MyStudyPage = () => {
   const navigate = useNavigate();
@@ -108,6 +112,29 @@ export const MyStudyPage = () => {
   }, [semesters]);
 
   // Course switcher handler: updates Redux, localStorage, and URL query param
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await dispatch(fetchMyCourses()).unwrap();
+      if (selectedCourse?._id) {
+        await dispatch(fetchSemestersByCourse(selectedCourse._id)).unwrap();
+      }
+      toast.success('Curriculum refreshed');
+    } catch (err) {
+      toast.error('Failed to refresh curriculum');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleAppRefresh = () => handleRefresh();
+    window.addEventListener('app:refresh', handleAppRefresh);
+    return () => window.removeEventListener('app:refresh', handleAppRefresh);
+  }, [selectedCourse?._id]);
+
   const handleCourseChange = (courseId) => {
     const course = myCourses.find((c) => c._id === courseId);
     if (course) {
@@ -134,43 +161,55 @@ export const MyStudyPage = () => {
 
       {/* Course Switcher */}
       {myCourses.length > 0 && (
-        <div className="flex items-center gap-2 bg-slate-50 p-2.5">
-          <span className="text-xs font-bold text-slate-500 uppercase px-2">Course:</span>
-          {myCourses.length > 1 ? (
-            <select
-              value={selectedCourse?._id || ''}
-              onChange={(e) => handleCourseChange(e.target.value)}
-              className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none cursor-pointer"
-            >
-              {myCourses.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <span className="text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded-lg px-3 py-1.5">
-              {selectedCourse?.name || myCourses[0]?.name}
-            </span>
-          )}
+        <div className="flex items-center justify-between gap-2 bg-slate-50 dark:bg-slate-800/60 p-2.5 border border-transparent dark:border-slate-800 rounded-lg">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase px-2">Course:</span>
+            {myCourses.length > 1 ? (
+              <select
+                value={selectedCourse?._id || ''}
+                onChange={(e) => handleCourseChange(e.target.value)}
+                className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none cursor-pointer"
+              >
+                {myCourses.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5">
+                {selectedCourse?.name || myCourses[0]?.name}
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-[var(--primary)] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+            title="Refresh courses and semesters"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-[var(--primary)]' : ''}`} />
+            <span>Refresh</span>
+          </button>
         </div>
       )}
 
       {/* ================= SEMESTERS GRID ================= */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider">
+          <h2 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
             Available Semesters ({mySemesters.length})
           </h2>
-          <span className="text-xs text-slate-400">Click a semester to open notes</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">Click a semester to open notes</span>
         </div>
 
         {myCourses.length === 0 ? (
-          <div className="p-10 text-center bg-white border border-dashed border-slate-200 space-y-3">
-            <Calendar className="w-9 h-9 text-slate-300 mx-auto" />
+          <div className="p-10 text-center bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 space-y-3">
+            <Calendar className="w-9 h-9 text-slate-300 dark:text-slate-600 mx-auto" />
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-slate-800">No courses created yet</h3>
-              <p className="text-xs text-slate-500">
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">No courses created yet</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 You haven't created any course yet. Create a course to add semesters and study notes.
               </p>
             </div>
@@ -183,11 +222,11 @@ export const MyStudyPage = () => {
             </button>
           </div>
         ) : mySemesters.length === 0 ? (
-          <div className="p-10 text-center bg-white border border-dashed border-slate-200 space-y-3">
-            <Calendar className="w-9 h-9 text-slate-300 mx-auto" />
+          <div className="p-10 text-center bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 space-y-3">
+            <Calendar className="w-9 h-9 text-slate-300 dark:text-slate-600 mx-auto" />
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-slate-800">No notes available in {selectedCourse?.name || 'this course'}</h3>
-              <p className="text-xs text-slate-500">
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">No notes available in {selectedCourse?.name || 'this course'}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 You haven't uploaded any notes in this course yet. Upload notes to see your semesters here.
               </p>
             </div>
@@ -214,15 +253,15 @@ export const MyStudyPage = () => {
               return (
                 <div
                   key={sem._id}
-                  className="bg-white border border-slate-200 hover:border-[var(--primary)] p-5 hover:shadow-md transition-all flex flex-col justify-between group space-y-4"
+                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-[var(--primary)] dark:hover:border-[var(--primary)] p-5 hover:shadow-md transition-all flex flex-col justify-between group space-y-4"
                 >
                   <div className="space-y-3">
                     {/* Top Term Tag */}
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[var(--primary-light)] text-[var(--primary-dark)]">
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[var(--primary-light)] dark:bg-indigo-950/60 text-[var(--primary-dark)] dark:text-indigo-400">
                         Term {semNumber}
                       </span>
-                      <Calendar className="w-4 h-4 text-slate-400 group-hover:text-[var(--primary)] transition-colors" />
+                      <Calendar className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-[var(--primary)] transition-colors" />
                     </div>
 
                     <div className="flex justify-between items-start gap-2">
@@ -230,16 +269,34 @@ export const MyStudyPage = () => {
                         {/* Semester Name */}
                         <h3
                           onClick={() => navigate(`/student/my-study/semester?semester=${semNumber}`)}
-                          className="text-base font-bold text-slate-900 group-hover:text-[var(--primary)] transition-colors line-clamp-1 cursor-pointer"
+                          className="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-[var(--primary)] transition-colors line-clamp-1 cursor-pointer"
                           title={`View Semester ${semNumber} notes`}
                         >
                           {sem.name || `Semester ${semNumber}`}
                         </h3>
 
                         {/* Notes Count */}
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
-                          <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>{sem.noteCount} Notes uploaded</span>
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex-wrap">
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <FileText className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                            <span>{sem.noteCount} Notes uploaded</span>
+                          </div>
+                          {(sem.publicNoteCount > 0 || sem.privateNoteCount > 0) && (
+                            <div className="flex items-center gap-1.5 text-[10px] pl-1.5 border-l border-slate-200 dark:border-slate-800">
+                              {sem.publicNoteCount > 0 && (
+                                <span className="inline-flex items-center gap-0.5 text-emerald-600 dark:text-emerald-400 font-semibold" title={`${sem.publicNoteCount} Public Note${sem.publicNoteCount > 1 ? 's' : ''}`}>
+                                  <Globe className="w-2.5 h-2.5" />
+                                  <span>{sem.publicNoteCount}</span>
+                                </span>
+                              )}
+                              {sem.privateNoteCount > 0 && (
+                                <span className="inline-flex items-center gap-0.5 text-amber-600 dark:text-amber-400 font-semibold" title={`${sem.privateNoteCount} Private Note${sem.privateNoteCount > 1 ? 's' : ''}`}>
+                                  <Lock className="w-2.5 h-2.5" />
+                                  <span>{sem.privateNoteCount}</span>
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <button
@@ -252,7 +309,7 @@ export const MyStudyPage = () => {
                               : `/student/add-notes?step=3&semester=${semNumber}`
                           );
                         }}
-                        className="py-1.5 px-2.5 text-xs font-semibold text-[var(--primary)] hover:bg-[var(--secondary-light)] bg-[var(--primary-light)] transition-colors cursor-pointer flex items-center gap-1 shrink-0"
+                        className="py-1.5 px-2.5 text-xs font-semibold text-[var(--primary)] hover:bg-[var(--secondary-light)] bg-[var(--primary-light)] dark:bg-indigo-950/60 dark:text-indigo-300 dark:hover:bg-indigo-900/60 transition-colors cursor-pointer flex items-center gap-1 shrink-0"
                         title={`Upload note in ${sem.name || `Semester ${semNumber}`}`}
                       >
                         <Plus className="w-3.5 h-3.5" />
@@ -261,20 +318,20 @@ export const MyStudyPage = () => {
                     </div>
 
                     {/* Subject Names List */}
-                    <div className="space-y-1.5 pt-2 border-t border-slate-100">
-                      <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                         <span>Subjects with Notes</span>
                         <span>{semSubjects.length}</span>
                       </div>
 
                       {semSubjects.length === 0 ? (
-                        <p className="text-xs text-slate-400 italic">No notes uploaded in subjects yet</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 italic">No notes uploaded in subjects yet</p>
                       ) : (
                         <ul className="space-y-1">
                           {semSubjects.map((sub) => (
                             <li
                               key={sub._id}
-                              className="text-xs font-medium text-slate-700 hover:text-[var(--primary)] flex items-center justify-between gap-1.5 transition-colors group/item"
+                              className="text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-[var(--primary)] flex items-center justify-between gap-1.5 transition-colors group/item"
                             >
                               <div
                                 onClick={() =>
@@ -290,15 +347,36 @@ export const MyStudyPage = () => {
                                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] shrink-0" />
                                 <span className="truncate">{sub.name}</span>
                                 {sub.subjectCode && (
-                                  <span className="text-[10px] text-slate-400 shrink-0 uppercase">
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 shrink-0 uppercase">
                                     ({sub.subjectCode})
                                   </span>
                                 )}
                               </div>
                               <div className="flex items-center gap-1.5 shrink-0">
-                                <span className="text-[10px] text-slate-400 font-medium">
+                                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
                                   {sub.noteCount} {sub.noteCount === 1 ? 'note' : 'notes'}
                                 </span>
+
+                                {/* Visibility Icons on the right */}
+                                <div className="flex items-center gap-1">
+                                  {sub.publicCount > 0 && (
+                                    <span
+                                      className="inline-flex items-center justify-center p-0.5 rounded text-emerald-600 dark:text-emerald-400 hover:scale-110 transition-transform"
+                                      title={`${sub.publicCount} Public note${sub.publicCount > 1 ? 's' : ''}`}
+                                    >
+                                      <Globe className="w-3 h-3" />
+                                    </span>
+                                  )}
+                                  {sub.privateCount > 0 && (
+                                    <span
+                                      className="inline-flex items-center justify-center p-0.5 rounded text-amber-600 dark:text-amber-400 hover:scale-110 transition-transform"
+                                      title={`${sub.privateCount} Private note${sub.privateCount > 1 ? 's' : ''}`}
+                                    >
+                                      <Lock className="w-3 h-3" />
+                                    </span>
+                                  )}
+                                </div>
+
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -309,7 +387,7 @@ export const MyStudyPage = () => {
                                         : `/student/add-notes?step=4&semester=${semNumber}&subject=${encodeURIComponent(sub.name)}`
                                     );
                                   }}
-                                  className="p-1 rounded text-slate-400 hover:text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors cursor-pointer"
+                                  className="p-1 rounded text-slate-400 dark:text-slate-500 hover:text-[var(--primary)] hover:bg-[var(--primary-light)] dark:hover:bg-indigo-950/60 transition-colors cursor-pointer"
                                   title={`Upload note for ${sub.name}`}
                                 >
                                   <Plus className="w-3 h-3" />
@@ -321,7 +399,7 @@ export const MyStudyPage = () => {
                       )}
                     </div>
                   </div>
- 
+
                 </div>
               );
             })}

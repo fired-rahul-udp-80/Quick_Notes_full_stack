@@ -57,9 +57,11 @@ export const fetchSubjectsForSemesters = createAsyncThunk(
     try {
       const state = getState().course;
       const cached = state.subjectsBySemester || {};
-      const missingIds = (semesterIds || []).filter((id) => id && !cached[id]);
+      const missingIds = (semesterIds || []).filter(
+        (id) => id && (!cached[id] || cached[id].length === 0 || cached[id][0]?.publicCount === undefined)
+      );
 
-      // If all are already in cache, return existing without network calls
+      // If all are already in cache with updated counts, return existing without network calls
       if (missingIds.length === 0) {
         return cached;
       }
@@ -183,6 +185,15 @@ const courseSlice = createSlice({
       state.selectedSubject = newSubject;
     },
 
+    updateSubjectInList: (state, action) => {
+      const updated = action.payload;
+      if (!updated?._id) return;
+      state.subjects = state.subjects.map((s) => (s._id === updated._id ? { ...s, ...updated } : s));
+      if (state.selectedSubject?._id === updated._id) {
+        state.selectedSubject = { ...state.selectedSubject, ...updated };
+      }
+    },
+
     // Completion & Reset
     setIsCompleted: (state, action) => {
       state.isCompleted = action.payload;
@@ -282,6 +293,7 @@ export const {
   addSemester,
   setSelectedSubject,
   addSubject,
+  updateSubjectInList,
   setIsCompleted,
   resetCourseBuilder,
 } = courseSlice.actions;

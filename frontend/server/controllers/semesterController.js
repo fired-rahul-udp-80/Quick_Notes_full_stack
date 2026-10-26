@@ -125,13 +125,29 @@ const getSemestersByCourse = async (req, res) => {
     // Populate dynamic subject counts and user-specific note counts
     const semestersWithCounts = await Promise.all(
       semesters.map(async (sem) => {
-        const [subjectCount, myNoteCount] = await Promise.all([
+        const [subjectCount, myNoteCount, publicNoteCount, privateNoteCount] = await Promise.all([
           Subject.countDocuments({ semester: sem._id, isActive: true }),
           currentUserId
             ? Note.countDocuments({
                 semester: sem._id,
                 owner: currentUserId,
                 status: { $ne: 'ARCHIVED' }
+              })
+            : 0,
+          currentUserId
+            ? Note.countDocuments({
+                semester: sem._id,
+                owner: currentUserId,
+                status: { $ne: 'ARCHIVED' },
+                visibility: 'PUBLIC'
+              })
+            : 0,
+          currentUserId
+            ? Note.countDocuments({
+                semester: sem._id,
+                owner: currentUserId,
+                status: { $ne: 'ARCHIVED' },
+                visibility: 'PRIVATE'
               })
             : 0
         ]);
@@ -140,7 +156,9 @@ const getSemestersByCourse = async (req, res) => {
           ...sem,
           subjectCount,
           noteCount: myNoteCount,
-          myNoteCount
+          myNoteCount,
+          publicNoteCount,
+          privateNoteCount
         };
       })
     );

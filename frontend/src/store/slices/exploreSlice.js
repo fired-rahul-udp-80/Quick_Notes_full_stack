@@ -237,15 +237,20 @@ export const selectFilteredExploreNotes = createSelector(
 
     if (selectedCourseId !== 'ALL') {
       result = result.filter((n) => {
-        const cId = typeof n.course === 'object' ? n.course?._id : n.course;
-        return cId === selectedCourseId;
+        const cId =
+          typeof n.course === 'object' && n.course !== null
+            ? n.course?._id || n.course?.id
+            : n.course;
+        return cId && String(cId) === String(selectedCourseId);
       });
     }
 
     if (selectedSemesterNum !== 'ALL') {
       result = result.filter((n) => {
         const semNum =
-          typeof n.semester === 'object' ? n.semester?.semesterNumber : Number(n.semester);
+          typeof n.semester === 'object' && n.semester !== null
+            ? n.semester?.semesterNumber
+            : Number(n.semester);
         return Number(semNum) === Number(selectedSemesterNum);
       });
     }

@@ -188,21 +188,44 @@ const getSubjectsBySemester = async (req, res) => {
 
     const subjectsWithCounts = await Promise.all(
       subjects.map(async (subj) => {
-        const noteCount = currentUserId
-          ? await Note.countDocuments({
+        let noteCount = 0;
+        let publicCount = 0;
+        let privateCount = 0;
+
+        if (currentUserId) {
+          [noteCount, publicCount, privateCount] = await Promise.all([
+            Note.countDocuments({
               subject: subj._id,
               owner: currentUserId,
               status: { $ne: 'ARCHIVED' }
-            })
-          : await Note.countDocuments({
+            }),
+            Note.countDocuments({
               subject: subj._id,
-              status: 'PUBLISHED',
+              owner: currentUserId,
+              status: { $ne: 'ARCHIVED' },
               visibility: 'PUBLIC'
-            });
+            }),
+            Note.countDocuments({
+              subject: subj._id,
+              owner: currentUserId,
+              status: { $ne: 'ARCHIVED' },
+              visibility: 'PRIVATE'
+            })
+          ]);
+        } else {
+          noteCount = await Note.countDocuments({
+            subject: subj._id,
+            status: 'PUBLISHED',
+            visibility: 'PUBLIC'
+          });
+          publicCount = noteCount;
+        }
 
         return {
           ...subj,
-          noteCount
+          noteCount,
+          publicCount,
+          privateCount
         };
       })
     );
@@ -301,13 +324,28 @@ const updateSubject = async (req, res) => {
 
     // Ownership check
     const currentUserId = req.user.userId;
-    const isOwner = subject.course.createdBy.toString() === currentUserId.toString();
+    const isOwner =
+      (subject.createdBy && subject.createdBy.toString() === currentUserId.toString()) ||
+      (subject.course && subject.course.createdBy && subject.course.createdBy.toString() === currentUserId.toString());
     const isAdmin = req.user.role === 'ADMIN';
 
     if (!isOwner && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: 'You do not have permission to modify this subject'
+      });
+    }
+
+    // Restriction: Cannot edit subject if notes are already uploaded
+    const noteCount = await Note.countDocuments({
+      subject: subject._id,
+      status: { $ne: 'ARCHIVED' }
+    });
+
+    if (noteCount > 0 && !isAdmin) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot edit subject because notes are already uploaded to it'
       });
     }
 

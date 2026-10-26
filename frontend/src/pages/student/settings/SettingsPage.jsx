@@ -36,10 +36,10 @@ export const SettingsPage = () => {
 
       {/* Page Title & Subtitle */}
       <div>
-        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
           Account & Academic Settings
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
           Manage your personal student profile, credentials, and notification preferences.
         </p>
       </div>
@@ -48,7 +48,7 @@ export const SettingsPage = () => {
       <AccountOverviewCard user={user} />
 
       {/* 2. Navigation Tabs */}
-      <div className="flex border-b border-slate-200 gap-2 sm:gap-6 text-xs sm:text-sm font-bold select-none overflow-x-auto">
+      <div className="flex border-b border-slate-200 dark:border-slate-800 gap-2 sm:gap-6 text-xs sm:text-sm font-bold select-none overflow-x-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -59,11 +59,11 @@ export const SettingsPage = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`pb-3 px-1 transition-colors cursor-pointer border-b-2 -mb-[2px] inline-flex items-center gap-2 whitespace-nowrap ${
                 isActive
-                  ? 'border-[var(--primary)] text-[var(--primary-dark)]'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  ? 'border-[var(--primary)] text-[var(--primary-dark)] dark:text-indigo-400 dark:border-indigo-500'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-[var(--primary)]' : 'text-slate-400'}`} />
+              <Icon className={`w-4 h-4 ${isActive ? 'text-[var(--primary)] dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`} />
               <span>{tab.label}</span>
             </button>
           );

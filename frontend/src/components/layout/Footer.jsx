@@ -1,48 +1,65 @@
 import React from 'react';
 import { Logo } from '../common/Logo';
-import {useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 export const Footer = () => {
   const navigate = useNavigate();
-  const {role} = useSelector((state) => state.auth);
+  const { role, isAuthenticated } = useSelector((state) => state.auth);
+  const dashboardPath = role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard';
 
   return (
-    <footer className="bg-white border-t border-slate-200/90 text-slate-600 text-sm">
+    <footer className="bg-white dark:bg-slate-900 border-t border-slate-200/90 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-sm transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Brand Info */}
           <div className="col-span-2 space-y-3">
-            <Logo size="md" onClick={() => navigate('landing')} />
-            <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
+            <Logo size="md" onClick={() => navigate('/')} />
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
               Store, organize and explore course-wise notes in one simple study platform designed for university students.
             </p>
-            <div className="text-xs text-slate-400">
+            <div className="text-xs text-slate-400 dark:text-slate-500">
               © {new Date().getFullYear()} NIU Notes. Built for higher education.
             </div>
           </div>
 
           {/* Platform Links */}
           <div className="space-y-2.5">
-            <h5 className="text-xs font-bold uppercase tracking-wider text-slate-900">Platform</h5>
+            <h5 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">Platform</h5>
             <ul className="space-y-2 text-xs">
               <li>
-                <button onClick={() => navigate('dashboard')} className="hover:text-indigo-600 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => navigate(isAuthenticated ? dashboardPath : '/login')}
+                  className="hover:text-primary dark:hover:text-yellow-300 transition-colors cursor-pointer"
+                >
                   Dashboard
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('my-study')} className="hover:text-indigo-600 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => navigate(isAuthenticated ? '/student/my-study' : '/login')}
+                  className="hover:text-primary dark:hover:text-yellow-300 transition-colors cursor-pointer"
+                >
                   My Study
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('my-notes')} className="hover:text-indigo-600 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => navigate(isAuthenticated ? '/student/my-notes' : '/login')}
+                  className="hover:text-primary dark:hover:text-yellow-300 transition-colors cursor-pointer"
+                >
                   My Notes
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('saved-notes')} className="hover:text-indigo-600 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => navigate(isAuthenticated ? '/student/saved-notes' : '/login')}
+                  className="hover:text-primary dark:hover:text-yellow-300 transition-colors cursor-pointer"
+                >
                   Saved Notes
                 </button>
               </li>
@@ -51,26 +68,33 @@ export const Footer = () => {
 
           {/* Explore Links */}
           <div className="space-y-2.5">
-            <h5 className="text-xs font-bold uppercase tracking-wider text-slate-900">Explore</h5>
+            <h5 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">Explore</h5>
             <ul className="space-y-2 text-xs">
               <li>
-                <button onClick={() => navigate('explore')} className="hover:text-indigo-600 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => navigate('/explore')}
+                  className="hover:text-primary dark:hover:text-yellow-300 transition-colors cursor-pointer"
+                >
                   Explore Notes
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('enrolled-courses')} className="hover:text-indigo-600 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => navigate(isAuthenticated ? '/student/enrolled-notes' : '/login')}
+                  className="hover:text-primary dark:hover:text-yellow-300 transition-colors cursor-pointer"
+                >
                   Enrolled Courses
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('course-details', { courseId: 'course-cpp' })} className="hover:text-indigo-600 transition-colors">
-                  C++ Programming
-                </button>
-              </li>
-              <li>
-                <button onClick={() => navigate('course-details', { courseId: 'course-python' })} className="hover:text-indigo-600 transition-colors">
-                  Python Notes
+                <button
+                  type="button"
+                  onClick={() => navigate('/course-details')}
+                  className="hover:text-primary dark:hover:text-yellow-300 transition-colors cursor-pointer"
+                >
+                  Curriculum Courses
                 </button>
               </li>
             </ul>
@@ -78,23 +102,31 @@ export const Footer = () => {
 
           {/* Account & Legal */}
           <div className="space-y-2.5">
-            <h5 className="text-xs font-bold uppercase tracking-wider text-slate-900">Account & Legal</h5>
+            <h5 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">Account & Legal</h5>
             <ul className="space-y-2 text-xs">
               <li>
-                <button onClick={() => navigate('login')} className="hover:text-indigo-600 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => navigate('/login')}
+                  className="hover:text-primary dark:hover:text-yellow-300 transition-colors cursor-pointer"
+                >
                   Login
                 </button>
               </li>
               <li>
-                <button onClick={() => navigate('register')} className="hover:text-indigo-600 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => navigate('/signup')}
+                  className="hover:text-primary dark:hover:text-yellow-300 transition-colors cursor-pointer"
+                >
                   Register
                 </button>
               </li>
               <li>
-                <span className="text-slate-400">Privacy Policy</span>
+                <span className="text-slate-400 dark:text-slate-500">Privacy Policy</span>
               </li>
               <li>
-                <span className="text-slate-400">Terms of Service</span>
+                <span className="text-slate-400 dark:text-slate-500">Terms of Service</span>
               </li>
             </ul>
           </div>
@@ -103,3 +135,5 @@ export const Footer = () => {
     </footer>
   );
 };
+
+export default Footer;

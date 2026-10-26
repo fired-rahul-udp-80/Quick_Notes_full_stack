@@ -15,7 +15,7 @@ import {
   selectSavedNoteIds,
   selectFilteredExploreNotes,
 } from '../../../store/slices/exploreSlice';
-import { Loader2, FileText } from 'lucide-react';
+import { Loader2, FileText, RefreshCw } from 'lucide-react';
 
 export const ExploreNotesPage = () => {
   const dispatch = useDispatch();
@@ -36,8 +36,26 @@ export const ExploreNotesPage = () => {
   const [selectedNote, setSelectedNote] = useState(null);
 
   // Fetch explore catalog on mount
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await dispatch(fetchExploreData()).unwrap();
+      toast.success('Explore notes refreshed');
+    } catch (err) {
+      toast.error('Failed to refresh explore notes');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     dispatch(fetchExploreData());
+
+    const handleAppRefresh = () => handleRefresh();
+    window.addEventListener('app:refresh', handleAppRefresh);
+    return () => window.removeEventListener('app:refresh', handleAppRefresh);
   }, [dispatch]);
 
   // Bookmark Toggle Handler
@@ -98,29 +116,39 @@ export const ExploreNotesPage = () => {
       <Breadcrumb items={[{ label: 'Explore Notes' }]} />
 
       {/* Header */}
-      <div>
-        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-          Explore Academic Notes
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Browse curriculum notes across courses.
-        </p>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            Explore Academic Notes
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Browse curriculum notes across courses.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-[var(--primary)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+          title="Refresh explore notes"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-[var(--primary)]' : ''}`} />
+          <span>Refresh</span>
+        </button>
       </div>
-
-      
 
       {/* Notes Grid */}
       {loading ? (
         <div className="py-24 text-center space-y-3">
           <Loader2 className="w-8 h-8 animate-spin text-[var(--primary)] mx-auto" />
-          <p className="text-xs text-slate-500">Loading academic notes catalog...</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Loading academic notes catalog...</p>
         </div>
       ) : filteredNotes.length === 0 ? (
-        <div className="bg-white border border-dashed border-slate-200 p-12 text-center space-y-3">
-          <FileText className="w-10 h-10 text-slate-300 mx-auto" />
+        <div className="bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 p-12 text-center space-y-3">
+          <FileText className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto" />
           <div className="space-y-1">
-            <h3 className="text-base font-bold text-slate-800">No notes found</h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">No notes found</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               No study notes matched your search criteria or selected filters.
             </p>
           </div>

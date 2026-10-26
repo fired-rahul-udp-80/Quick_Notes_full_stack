@@ -24,6 +24,7 @@ router
   .route('/:id')
   .get(authenticate, getSubjectById)
   .patch(authenticate, updateSubject)
+  .put(authenticate, updateSubject)
   .delete(authenticate, deleteSubject);
 
 module.exports = router;

@@ -3,6 +3,7 @@ import authReducer from './slices/authSlice';
 import courseReducer from './slices/courseSlice';
 import exploreReducer from './slices/exploreSlice';
 import enrolledReducer from './slices/enrolledSlice';
+import themeReducer from './slices/themeSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     course: courseReducer,
     explore: exploreReducer,
     enrolled: enrolledReducer,
+    theme: themeReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
 });

@@ -23,6 +23,14 @@ export const noteApi = {
     return response.data;
   },
 
+  updateNote: async (id, data) => {
+    const isFormData = data instanceof FormData;
+    const response = await apiClient.patch(`/notes/${id}`, data, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {},
+    });
+    return response.data;
+  },
+
   deleteNote: async (id) => {
     const response = await apiClient.delete(`/notes/${id}`);
     return response.data;

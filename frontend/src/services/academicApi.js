@@ -52,6 +52,11 @@ export const academicApi = {
     return response.data;
   },
 
+  updateSubject: async (subjectId, data) => {
+    const response = await apiClient.patch(`/subjects/${subjectId}`, data);
+    return response.data;
+  },
+
  // Bookmark / Saved Notes APIs
   saveNote: async (noteId) => {
     const response = await apiClient.post(`/saved-notes/${noteId}`);

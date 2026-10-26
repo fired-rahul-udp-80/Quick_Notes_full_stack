@@ -1,14 +1,24 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { Provider, useDispatch } from 'react-redux';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 import { store } from './store';
 import { AppRoutes } from './routes/AppRoutes';
 import { Toaster } from 'react-hot-toast';
 import { authApi } from './services/authApi';
 import { setCredentials, logout } from './store/slices/authSlice';
+import { selectThemeMode } from './store/slices/themeSlice';
 
 function AppContent() {
   const dispatch = useDispatch();
+  const themeMode = useSelector(selectThemeMode);
+
+  useEffect(() => {
+    if (themeMode === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [themeMode]);
 
   useEffect(() => {
     let isMounted = true;
@@ -62,7 +72,15 @@ function AppContent() {
   return (
     <BrowserRouter>
       <AppRoutes />
-      <Toaster />
+      <Toaster
+        toastOptions={{
+          style: themeMode === 'dark' ? {
+            background: '#1e293b',
+            color: '#f8fafc',
+            border: '1px solid #334155',
+          } : undefined,
+        }}
+      />
     </BrowserRouter>
   );
 }

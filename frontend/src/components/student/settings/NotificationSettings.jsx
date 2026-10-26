@@ -85,20 +85,20 @@ export const NotificationSettings = () => {
   ];
 
   return (
-    <div className="bg-white border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-6">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-6 transition-colors">
       {/* Header Bar */}
-      <div className="border-b border-slate-100 pb-4">
-        <h3 className="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
-          <Bell className="w-4 h-4 text-[var(--primary)]" />
+      <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+        <h3 className="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <Bell className="w-4 h-4 text-[var(--primary)] dark:text-indigo-400" />
           <span>Notification & Communication Preferences</span>
         </h3>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           Select what study activity alerts and semester reminders you would like to receive.
         </p>
       </div>
 
       {/* Notifications List */}
-      <div className="divide-y divide-slate-100">
+      <div className="divide-y divide-slate-100 dark:divide-slate-800">
         {notificationItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -107,14 +107,14 @@ export const NotificationSettings = () => {
               className="py-4 first:pt-0 last:pb-0 flex items-start justify-between gap-4"
             >
               <div className="flex items-start gap-3.5">
-                <div className="w-8 h-8 rounded-none bg-slate-100 text-[var(--primary)] flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-[var(--primary)] dark:text-indigo-400 flex items-center justify-center shrink-0 mt-0.5">
                   <Icon className="w-4 h-4" />
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-xs sm:text-sm font-bold text-slate-900 block">
+                  <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block">
                     {item.title}
                   </span>
-                  <p className="text-xs text-slate-500 leading-relaxed max-w-xl">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-xl">
                     {item.description}
                   </p>
                 </div>
@@ -128,7 +128,7 @@ export const NotificationSettings = () => {
                   onChange={() => togglePref(item.id)}
                   className="sr-only peer"
                 />
-                <div className="w-10 h-5 bg-slate-200 peer-focus:outline-none peer-checked:bg-[var(--primary)] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all" />
+                <div className="w-10 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-checked:bg-[var(--primary)] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all" />
               </label>
             </div>
           );
@@ -136,7 +136,7 @@ export const NotificationSettings = () => {
       </div>
 
       {/* Bottom Save confirmation */}
-      <div className="pt-4 border-t border-slate-100 flex justify-end">
+      <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
         <button
           type="button"
           onClick={handleSaveAll}

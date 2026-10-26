@@ -76,16 +76,16 @@ export const SavedNotesPage = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
             Saved Notes
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             Your personal reading list of bookmarked academic notes across courses.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold px-3 py-1 bg-slate-100 text-slate-700">
+          <span className="text-xs font-bold px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
             {savedItems.length} Bookmarks
           </span>
           <button

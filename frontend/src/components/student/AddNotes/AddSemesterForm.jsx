@@ -213,31 +213,31 @@ export const AddSemesterForm = () => {
   }
 
   return (
-    <div className="bg-white p-6 sm:p-8 space-y-6">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-xs">
       {/* Header with Mode Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-800">
         <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
             Choose or Add Semester
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             Specify the academic term or semester index for {selectedCourse.name}.
           </p>
         </div>
 
         {/* Mode Switcher Tabs */}
-        <div className="inline-flex p-1 bg-slate-100 text-xs font-semibold self-start sm:self-auto">
+        <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800 text-xs font-semibold self-start sm:self-auto">
           <button
             type="button"
             onClick={() => setMode('select')}
             className={`px-3.5 py-1.5 transition-all cursor-pointer flex items-center gap-1.5 ${
               mode === 'select'
-                ? 'bg-white text-[var(--primary)] shadow-xs font-bold'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-900 text-[var(--primary)] dark:text-indigo-400 shadow-xs font-bold'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             <span>Select Existing</span>
-            <span className="px-1.5 py-0.2 rounded-full bg-slate-200/70 text-[10px] text-slate-700">
+            <span className="px-1.5 py-0.2 rounded-full bg-slate-200/70 dark:bg-slate-700 text-[10px] text-slate-700 dark:text-slate-300">
               {activeSemesters.length}
             </span>
           </button>
@@ -246,8 +246,8 @@ export const AddSemesterForm = () => {
             onClick={handleSwitchToCreate}
             className={`px-3.5 py-1.5 transition-all cursor-pointer flex items-center gap-1.5 ${
               mode === 'create'
-                ? 'bg-white text-[var(--primary)] shadow-xs font-bold'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-900 text-[var(--primary)] dark:text-indigo-400 shadow-xs font-bold'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             <PlusCircle className="w-3.5 h-3.5" />
@@ -263,11 +263,11 @@ export const AddSemesterForm = () => {
           {loading && activeSemesters.length === 0 ? (
             <div className="py-12 text-center space-y-3">
               <Loader2 className="w-6 h-6 animate-spin text-[var(--primary)] mx-auto" />
-              <p className="text-xs text-slate-500">Loading semesters for {selectedCourse.name}...</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Loading semesters for {selectedCourse.name}...</p>
             </div>
           ) : error && activeSemesters.length === 0 ? (
             /* Error & Retry State */
-            <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 space-y-2 text-xs">
+            <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 space-y-2 text-xs">
               <div className="flex items-center gap-2 font-bold">
                 <AlertCircle className="w-4 h-4" />
                 <span>Failed to load semesters</span>
@@ -284,20 +284,20 @@ export const AddSemesterForm = () => {
             </div>
           ) : activeSemesters.length === 0 ? (
             /* Empty State */
-            <div className="py-10 text-center border-2 border-dashed border-slate-200 rounded-xl space-y-3">
-              <Calendar className="w-8 h-8 text-slate-300 mx-auto" />
+            <div className="py-10 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl space-y-3">
+              <Calendar className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-slate-700">
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   No semesters configured for this course yet
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Add the first semester (e.g. Semester 1) to continue.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={handleSwitchToCreate}
-                className="px-4 py-2 text-xs font-semibold text-[var(--primary)] bg-[var(--primary-light)] hover:bg-[var(--primary-border)]/50 rounded-lg transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-[var(--primary)] bg-[var(--primary-light)] dark:bg-indigo-950/60 dark:text-indigo-400 hover:bg-[var(--primary-border)]/50 rounded-lg transition-colors cursor-pointer"
               >
                 + Add Semester 1
               </button>
@@ -306,10 +306,10 @@ export const AddSemesterForm = () => {
             /* Semester Cards Selection */
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   Select Existing Semester ({activeSemesters.length})
                 </label>
-                <span className="text-[11px] text-slate-400">Click a card to select</span>
+                <span className="text-[11px] text-slate-400 dark:text-slate-500">Click a card to select</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -326,24 +326,24 @@ export const AddSemesterForm = () => {
                       onDoubleClick={() => handleSelectExisting()}
                       className={`p-4 border rounded-none cursor-pointer transition-all flex flex-col justify-between space-y-3 group ${
                         isSelected
-                          ? 'border-[var(--primary)] bg-[var(--primary-light)]/20 ring-1 ring-[var(--primary)] shadow-xs'
-                          : 'border-slate-200 bg-white hover:border-[var(--primary)] hover:bg-slate-50'
+                          ? 'border-[var(--primary)] bg-[var(--primary-light)]/20 dark:bg-indigo-950/40 ring-1 ring-[var(--primary)] shadow-xs'
+                          : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-[var(--primary)] dark:hover:border-[var(--primary)] hover:bg-slate-50 dark:hover:bg-slate-800/50'
                       }`}
                     >
                       {/* Semester Name & Info */}
                       <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-sm text-slate-900 group-hover:text-[var(--primary)] transition-colors truncate">
+                        <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100 group-hover:text-[var(--primary)] transition-colors truncate">
                           {s.name || `Semester ${semNum}`}
                         </h4>
                         {isSelected ? (
                           <CheckCircle2 className="w-4 h-4 text-[var(--primary)] shrink-0" />
                         ) : (
-                          <div className="w-4 h-4 rounded-full border border-slate-300 group-hover:border-[var(--primary)] shrink-0" />
+                          <div className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-600 group-hover:border-[var(--primary)] shrink-0" />
                         )}
                       </div>
 
                       {/* Metadata / Counts */}
-                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                      <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500">
                         <span>{hasSubjectCount ? `${s.subjectCount} subjects` : 'Active Term'}</span>
                         {hasNoteCount && <span>{s.noteCount} notes</span>}
                       </div>
@@ -355,11 +355,11 @@ export const AddSemesterForm = () => {
           )}
 
           {/* Form Actions */}
-          <div className="pt-4 flex items-center justify-between border-t border-slate-100">
+          <div className="pt-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={() => dispatch(setCurrentStep(1))}
-              className="px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer inline-flex items-center gap-1.5"
+              className="px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer inline-flex items-center gap-1.5"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Course</span>
@@ -381,7 +381,7 @@ export const AddSemesterForm = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {/* Semester Number */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 Semester Number (1 - 12) <span className="text-rose-500">*</span>
               </label>
               <input
@@ -392,16 +392,16 @@ export const AddSemesterForm = () => {
                 min={1}
                 max={12}
                 required
-                className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
+                className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
               />
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 Identifies term index in the academic structure.
               </p>
             </div>
 
             {/* Semester Display Name */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 Display Name
               </label>
               <input
@@ -411,20 +411,20 @@ export const AddSemesterForm = () => {
                 onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                 placeholder="e.g. Semester 1, 1st Year Autumn..."
                 maxLength={100}
-                className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
+                className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
               />
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 Optional custom label (defaults to "Semester {formData.semesterNumber || 1}").
               </p>
             </div>
           </div>
 
           {/* Form Actions */}
-          <div className="pt-4 flex items-center justify-between border-t border-slate-100">
+          <div className="pt-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={() => dispatch(setCurrentStep(1))}
-              className="px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer inline-flex items-center gap-1.5"
+              className="px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer inline-flex items-center gap-1.5"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Course</span>

@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { Eye, EyeOff, Check } from 'lucide-react';
 import { Logo } from '../../components/common/Logo';
+import { GridBackground } from '../../components/common/GridBackground';
 import { authApi } from '../../services/authApi';
 import { toast } from "react-hot-toast";
 import { useDispatch, useSelector } from 'react-redux';
@@ -112,15 +113,15 @@ export const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full bg-white border border-slate-300 p-8 space-y-6">
+    <GridBackground isFullPage showGlow={true} mask="radial" className="flex items-center justify-center p-4">
+      <div className="max-w-2xl sm:min-w-2xl w-full bg-white/95 dark:bg-[#0d0e13]/95 backdrop-blur-md  border border-slate-200/80 dark:border-slate-800 p-8 space-y-6 shadow-2xl transition-all">
         {/* Brand Header */}
         <div className="text-center space-y-1">
           <div className="inline-block mb-1">
             <Logo size="md" onClick={() => navigate('/')} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Create an account</h2>
-          <p className="text-xs text-slate-500">Sign up to manage and access academic notes</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Create an account</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Sign up to manage and access academic notes</p>
         </div>
 
         {/* Signup Form */}
@@ -211,21 +212,21 @@ export const RegisterPage = () => {
           />
 
           {/* Password Validation Checklist */}
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-2.5 space-y-1.5">
-            <p className="text-[11px] font-semibold text-slate-600">Password requirements:</p>
+          <div className="bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 space-y-1.5">
+            <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">Password requirements:</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {passwordCriteria.map((item, idx) => (
                 <div
                   key={idx}
                   className={`flex items-center gap-1.5 transition-colors duration-150 ${
-                    item.met ? 'text-emerald-700 font-medium' : 'text-slate-500'
+                    item.met ? 'text-emerald-700 dark:text-emerald-400 font-medium' : 'text-slate-500 dark:text-slate-400'
                   }`}
                 >
                   <span
                     className={`w-3.5 h-3.5 rounded flex items-center justify-center border transition-all duration-150 ${
                       item.met
                         ? 'bg-emerald-600 border-emerald-600 text-white'
-                        : 'bg-white border-slate-300 text-transparent'
+                        : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-transparent'
                     }`}
                   >
                     <Check className="w-2.5 h-2.5 stroke-[3]" />
@@ -255,9 +256,9 @@ export const RegisterPage = () => {
                       aria-label="toggle confirm password visibility"
                     >
                       {showConfirmPassword ? (
-                        <EyeOff size={18} className="text-slate-600" />
+                        <EyeOff size={18} className="text-slate-600 dark:text-slate-300" />
                       ) : (
-                        <Eye size={18} className="text-slate-500" />
+                        <Eye size={18} className="text-slate-400 dark:text-slate-500" />
                       )}
                     </IconButton>
                   </InputAdornment>
@@ -273,11 +274,11 @@ export const RegisterPage = () => {
                 name='agreed'
                 checked={formData.agreed}
                 onChange={handleChange}
-                sx={{ color: '#4f46e5', '&.Mui-checked': { color: '#4f46e5' } }}
+                sx={{ color: 'var(--primary)', '&.Mui-checked': { color: 'var(--primary)' } }}
               />
             }
             label={
-              <span className="text-xs text-slate-600">
+              <span className="text-xs text-slate-600 dark:text-slate-300">
                 I agree to the Terms of Service & Privacy Policy
               </span>
             }
@@ -289,8 +290,9 @@ export const RegisterPage = () => {
             variant="contained"
             disabled={isLoading}
             sx={{
-              backgroundColor: '#4f46e5',
-              '&:hover': { backgroundColor: '#4338ca' },
+              backgroundColor: 'var(--primary)',
+              '&:hover': { backgroundColor: 'var(--primary-hover)' },
+              color: '#ffffff',
               textTransform: 'none',
               fontWeight: 600,
               padding: '9px 16px',
@@ -306,14 +308,14 @@ export const RegisterPage = () => {
         </form>
 
         {/* Footer Link */}
-        <p className="text-center text-xs text-slate-500">
+        <p className="text-center text-xs text-slate-500 dark:text-slate-400">
           Already have an account?{' '}
-          <Link to="/login" className="text-indigo-600 hover:text-indigo-700 font-semibold">
+          <Link to="/login" className="text-primary dark:text-yellow-300 hover:underline font-semibold">
             Sign in
           </Link>
         </p>
       </div>
-    </div>
+    </GridBackground>
   );
 };
 

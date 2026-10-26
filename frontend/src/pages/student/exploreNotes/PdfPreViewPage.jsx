@@ -227,11 +227,11 @@ export const PdfPreViewPage = () => {
 
   if (!note) {
     return (
-      <div className="bg-white border border-slate-200 p-12 text-center space-y-4 max-w-md mx-auto my-12 shadow-xs">
-        <FileText className="w-12 h-12 text-slate-300 mx-auto" />
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-12 text-center space-y-4 max-w-md mx-auto my-12 shadow-xs">
+        <FileText className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto" />
         <div className="space-y-1">
-          <h2 className="text-lg font-bold text-slate-900">Note Not Found</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Note Not Found</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             The requested document could not be located or has been removed.
           </p>
         </div>
@@ -257,13 +257,13 @@ export const PdfPreViewPage = () => {
       />
 
       {/* ================= 1. PAGE HEADER & DOCUMENT BAR ================= */}
-      <div className="bg-white border border-slate-200 p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Left Information */}
         <div className="flex items-start gap-3 min-w-0">
           <button
             type="button"
             onClick={() => navigate('/explore')}
-            className="p-2 border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer shrink-0"
+            className="p-2 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
             title="Back to Explore Notes"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -276,22 +276,22 @@ export const PdfPreViewPage = () => {
               </span>
 
               {isOwner && (
-                <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                   MY NOTE (AUTHOR)
                 </span>
               )}
             </div>
 
-            <h1 className="text-base sm:text-xl font-black text-slate-900 tracking-tight truncate max-w-xl">
+            <h1 className="text-base sm:text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight truncate max-w-xl">
               {noteTitle}
             </h1>
 
-            <div className="flex items-center gap-2 text-xs text-slate-500 flex-wrap font-medium">
-              <span className="text-slate-700 font-semibold">{courseName}</span>
+            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 flex-wrap font-medium">
+              <span className="text-slate-700 dark:text-slate-300 font-semibold">{courseName}</span>
               <span>•</span>
               <span>Semester {semesterNumber}</span>
               <span>•</span>
-              <span className="text-red-700 font-semibold">{subjectName}</span>
+              <span className="text-red-700 dark:text-red-400 font-semibold">{subjectName}</span>
               <span>•</span>
               <span>By {ownerName}</span>
             </div>
@@ -307,8 +307,8 @@ export const PdfPreViewPage = () => {
               onClick={handleBookmarkToggle}
               className={`p-2 border transition-colors cursor-pointer inline-flex items-center gap-1 text-xs font-semibold ${
                 isSaved
-                  ? 'border-red-200 bg-red-50 text-red-600'
-                  : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                  ? 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400'
+                  : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
               title={isSaved ? 'Remove Bookmark' : 'Bookmark Note'}
             >

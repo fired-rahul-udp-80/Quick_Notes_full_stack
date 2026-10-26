@@ -147,35 +147,35 @@ export const CreateCourseForm = () => {
   };
 
   return (
-    <div className="bg-white border border-slate-200/90 p-6 sm:p-8 space-y-6 shadow-xs">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-xs">
       {/* Header with Mode Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-800">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-semibold bg-[var(--primary-light)] text-[var(--primary-dark)] rounded-md mb-2">
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-semibold bg-[var(--primary-light)] dark:bg-indigo-950/60 text-[var(--primary-dark)] dark:text-indigo-400 rounded-md mb-2">
             <BookOpen className="w-3.5 h-3.5" />
             <span>Step 1 of 3: Course Selection</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
             Choose or Add Course
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             Select an existing degree from the shared catalog or register a new one.
           </p>
         </div>
 
         {/* Mode Switcher Tabs */}
-        <div className="inline-flex p-1 bg-slate-200 text-xs font-semibold self-start sm:self-auto">
+        <div className="inline-flex p-1 bg-slate-200 dark:bg-slate-800 text-xs font-semibold self-start sm:self-auto">
           <button
             type="button"
             onClick={() => setMode('select')}
             className={`px-3.5 py-1.5 transition-all cursor-pointer flex items-center gap-1.5 ${
               mode === 'select'
-                ? 'bg-white text-[var(--primary)] shadow-xs font-bold'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-900 text-[var(--primary)] dark:text-indigo-400 shadow-xs font-bold'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             <span>Select Existing</span>
-            <span className="px-1.5 py-0.2 bg-slate-200/70 text-[10px] text-slate-700">
+            <span className="px-1.5 py-0.2 bg-slate-200/70 dark:bg-slate-700 text-[10px] text-slate-700 dark:text-slate-300">
               {activeCourses.length}
             </span>
           </button>
@@ -184,8 +184,8 @@ export const CreateCourseForm = () => {
             onClick={() => setMode('create')}
             className={`px-3.5 py-1.5 transition-all cursor-pointer flex items-center gap-1.5 ${
               mode === 'create'
-                ? 'bg-white text-[var(--primary)] shadow-xs font-bold'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-900 text-[var(--primary)] dark:text-indigo-400 shadow-xs font-bold'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             <PlusCircle className="w-3.5 h-3.5" />
@@ -200,13 +200,13 @@ export const CreateCourseForm = () => {
           {/* Search filter if multiple courses */}
           {activeCourses.length > 3 && (
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search existing courses by title or type..."
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
+                className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
               />
             </div>
           )}
@@ -215,11 +215,11 @@ export const CreateCourseForm = () => {
           {loading && activeCourses.length === 0 ? (
             <div className="py-12 text-center space-y-3">
               <Loader2 className="w-6 h-6 animate-spin text-[var(--primary)] mx-auto" />
-              <p className="text-xs text-slate-500">Loading shared course catalog...</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Loading shared course catalog...</p>
             </div>
           ) : error && activeCourses.length === 0 ? (
             /* Error & Retry State */
-            <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 space-y-2 text-xs">
+            <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 space-y-2 text-xs">
               <div className="flex items-center gap-2 font-bold">
                 <AlertCircle className="w-4 h-4" />
                 <span>Failed to load courses</span>
@@ -236,16 +236,16 @@ export const CreateCourseForm = () => {
             </div>
           ) : activeCourses.length === 0 ? (
             /* Empty State */
-            <div className="py-10 text-center border-2 border-dashed border-slate-200 space-y-3">
-              <BookOpen className="w-8 h-8 text-slate-300 mx-auto" />
+            <div className="py-10 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-3">
+              <BookOpen className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-slate-700">No courses in the shared catalog yet</p>
-                <p className="text-xs text-slate-500">Be the first to create one for your curriculum.</p>
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No courses in the shared catalog yet</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Be the first to create one for your curriculum.</p>
               </div>
               <button
                 type="button"
                 onClick={() => setMode('create')}
-                className="px-4 py-2 text-xs font-semibold text-[var(--primary)] bg-[var(--primary-light)] hover:bg-[var(--primary-border)]/50 rounded-lg transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-[var(--primary)] bg-[var(--primary-light)] dark:bg-indigo-950/60 dark:text-indigo-400 hover:bg-[var(--primary-border)]/50 rounded-lg transition-colors cursor-pointer"
               >
                 + Create Course
               </button>
@@ -253,7 +253,7 @@ export const CreateCourseForm = () => {
           ) : (
             /* Course Options Selection */
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 Select Course from Shared Catalog ({filteredCourses.length})
               </label>
 
@@ -261,7 +261,7 @@ export const CreateCourseForm = () => {
                 value={selectedCourseId}
                 onChange={(e) => setSelectedCourseId(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 border border-slate-200 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all cursor-pointer"
+                className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all cursor-pointer"
               >
                 <option value="">-- Choose Course --</option>
                 {filteredCourses.map((c) => (
@@ -272,14 +272,14 @@ export const CreateCourseForm = () => {
                 ))}
               </select>
 
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 Selecting an existing course reuses its shared curriculum structure.
               </p>
             </div>
           )}
 
           {/* Form Actions */}
-          <div className="pt-4 flex items-center justify-end border-t border-slate-100">
+          <div className="pt-4 flex items-center justify-end border-t border-slate-100 dark:border-slate-800">
             <button
               type="submit"
               disabled={!selectedCourseId || loading || activeCourses.length === 0}
@@ -296,7 +296,7 @@ export const CreateCourseForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Course Name */}
             <div className="space-y-1.5 md:col-span-2">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 Course Name <span className="text-rose-500">*</span>
               </label>
               <input
@@ -308,23 +308,23 @@ export const CreateCourseForm = () => {
                 maxLength={150}
                 required
                 autoFocus
-                className="w-full px-4 py-2.5 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
+                className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all"
               />
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 If an existing course with this title already exists in the catalog, it will be automatically reused without creating duplicates.
               </p>
             </div>
 
             {/* Course Type */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 Course Type
               </label>
               <select
                 name="courseType"
                 value={formData.courseType}
                 onChange={handleTextChange}
-                className="w-full px-4 py-2.5 border border-slate-200 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all cursor-pointer"
+                className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all cursor-pointer"
               >
                 <option value="ACADEMIC">Academic Degree (College / University)</option>
                 <option value="SKILL">Skill / Professional Certification</option>
@@ -332,23 +332,23 @@ export const CreateCourseForm = () => {
             </div>
 
             {/* Publish Immediately */}
-            <div className="flex items-center gap-3 p-3.5 border border-slate-200/80 bg-slate-50 self-end">
+            <div className="flex items-center gap-3 p-3.5 border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 self-end">
               <input
                 type="checkbox"
                 id="isPublished"
                 name="isPublished"
                 checked={formData.isPublished}
                 onChange={handleTextChange}
-                className="w-4 h-4 text-[var(--primary)] rounded focus:ring-[var(--primary)] border-slate-300 cursor-pointer"
+                className="w-4 h-4 text-[var(--primary)] rounded focus:ring-[var(--primary)] border-slate-300 dark:border-slate-600 cursor-pointer"
               />
-              <label htmlFor="isPublished" className="text-xs text-slate-700 select-none cursor-pointer">
+              <label htmlFor="isPublished" className="text-xs text-slate-700 dark:text-slate-300 select-none cursor-pointer">
                 <span className="font-bold">Publish to Shared Catalog</span> — Makes course immediately accessible to peers.
               </label>
             </div>
           </div>
 
           {/* Form Actions */}
-          <div className="pt-4 flex items-center justify-end border-t border-slate-100">
+          <div className="pt-4 flex items-center justify-end border-t border-slate-100 dark:border-slate-800">
             <button
               type="submit"
               disabled={submitting || !formData.name.trim()}

@@ -79,14 +79,14 @@ export const ProfileSettings = ({ user }) => {
     Number(semester) !== (user?.academicProfile?.currentSemester || 1);
 
   return (
-    <div className="bg-white p-6 sm:p-8 space-y-6">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-xs transition-colors">
       {/* Section Header */}
-      <div className="border-b border-slate-100 pb-4">
-        <h3 className="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
-          <User className="w-4 h-4 text-[var(--primary)]" />
+      <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+        <h3 className="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <User className="w-4 h-4 text-[var(--primary)] dark:text-indigo-400" />
           <span>Academic Profile Information</span>
         </h3>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           Update your student identity details and current semester curriculum track.
         </p>
       </div>
@@ -95,71 +95,71 @@ export const ProfileSettings = ({ user }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {/* Full Name */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               Full Name <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <User className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Rahul Sharma"
-                className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-white border border-slate-200 focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] outline-none transition-colors"
+                className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] outline-none transition-colors"
               />
             </div>
           </div>
 
           {/* Email Address (Read-only) */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               Email
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Mail className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="email"
                 disabled
                 value={user?.email || ''}
-                className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 text-slate-500 cursor-not-allowed select-none"
+                className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed select-none"
               />
             </div>
-            <p className="text-[10px] text-slate-400 italic">
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 italic">
               Email is permanently bound to your academic record and cannot be changed here.
             </p>
           </div>
 
           {/* Academic Course */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               Academic Course
             </label>
             <div className="relative">
-              <GraduationCap className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <GraduationCap className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={course}
                 onChange={(e) => setCourse(e.target.value)}
                 placeholder="e.g. B.Tech Computer Science & Engineering"
-                className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-white border border-slate-200 focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] outline-none transition-colors"
+                className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] outline-none transition-colors"
               />
             </div>
           </div>
 
           {/* Current Semester Dropdown */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               Current Semester
             </label>
             <div className="relative">
               <select
                 value={semester}
                 onChange={(e) => setSemester(Number(e.target.value))}
-                className="w-full px-3 py-2 text-xs sm:text-sm bg-white border border-slate-200 focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] outline-none transition-colors cursor-pointer"
+                className="w-full px-3 py-2 text-xs sm:text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] outline-none transition-colors cursor-pointer"
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                  <option key={num} value={num}>
+                  <option key={num} value={num} className="dark:bg-slate-800 dark:text-slate-100">
                     Semester {num}
                   </option>
                 ))}
@@ -169,10 +169,10 @@ export const ProfileSettings = ({ user }) => {
         </div>
 
         {/* Action Button Bar */}
-        <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+        <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
           <div>
             {isDirty && (
-              <span className="text-xs text-amber-600 font-semibold inline-flex items-center gap-1">
+              <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold inline-flex items-center gap-1">
                 <ShieldAlert className="w-3.5 h-3.5" />
                 Unsaved changes
               </span>
@@ -184,7 +184,7 @@ export const ProfileSettings = ({ user }) => {
               type="button"
               onClick={handleReset}
               disabled={!isDirty || isSaving}
-              className="px-4 py-2 text-xs font-bold text-slate-600 border border-slate-200 hover:bg-slate-50 disabled:opacity-40 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+              className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 transition-colors cursor-pointer inline-flex items-center gap-1.5"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset</span>

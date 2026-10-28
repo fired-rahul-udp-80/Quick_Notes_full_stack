@@ -188,12 +188,18 @@ const getSubjectsBySemester = async (req, res) => {
 
     const subjectsWithCounts = await Promise.all(
       subjects.map(async (subj) => {
-        let noteCount = 0;
-        let publicCount = 0;
-        let privateCount = 0;
+        // Count all active/non-archived notes uploaded across ALL students for this subject
+        const totalNoteCount = await Note.countDocuments({
+          subject: subj._id,
+          status: { $ne: 'ARCHIVED' }
+        });
+
+        let myNoteCount = 0;
+        let myPublicCount = 0;
+        let myPrivateCount = 0;
 
         if (currentUserId) {
-          [noteCount, publicCount, privateCount] = await Promise.all([
+          [myNoteCount, myPublicCount, myPrivateCount] = await Promise.all([
             Note.countDocuments({
               subject: subj._id,
               owner: currentUserId,
@@ -213,19 +219,16 @@ const getSubjectsBySemester = async (req, res) => {
             })
           ]);
         } else {
-          noteCount = await Note.countDocuments({
-            subject: subj._id,
-            status: 'PUBLISHED',
-            visibility: 'PUBLIC'
-          });
-          publicCount = noteCount;
+          myPublicCount = totalNoteCount;
         }
 
         return {
           ...subj,
-          noteCount,
-          publicCount,
-          privateCount
+          totalNoteCount, // Exact count of notes uploaded by ANY student
+          noteCount: myNoteCount, // Count for the requesting student (for personal study filters)
+          myNoteCount,
+          publicCount: myPublicCount,
+          privateCount: myPrivateCount
         };
       })
     );

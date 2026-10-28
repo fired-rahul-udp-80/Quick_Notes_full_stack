@@ -188,34 +188,6 @@ export const PdfPreViewPage = () => {
     }
   };
 
-  // Download PDF
-  const handleDownload = () => {
-    if (!isEnrolled) {
-      toast.error('Please enroll in the course to download the full PDF.');
-      return;
-    }
-    if (!fileUrl) {
-      toast.error('File not available for download.');
-      return;
-    }
-    const link = document.createElement('a');
-    link.href = fileUrl;
-    link.download = `${noteTitle.replace(/[^a-zA-Z0-9_-]/g, '_')}.pdf`;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('Starting document download...');
-  };
-
-  const handleShare = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Preview link copied to clipboard!');
-    }
-  };
-
   if (loading) {
     return (
       <div className="py-32 text-center space-y-3">

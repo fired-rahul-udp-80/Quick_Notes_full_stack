@@ -412,23 +412,7 @@ export const SemesterPage = () => {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    {subjectNotes.length === 0 && (
-                      <button
-                        onClick={() => {
-                          const courseParam = selectedCourse?.slug || selectedCourse?.name || '';
-                          const currentSemNumber = currentSemester?.semesterNumber || semesterParam || 1;
-                          navigate(
-                            `/student/add-notes?step=3&course=${encodeURIComponent(courseParam)}&semester=${encodeURIComponent(currentSemNumber)}&editSubjectId=${encodeURIComponent(sub._id)}&returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`
-                          );
-                        }}
-                        className="text-xs font-semibold text-slate-500 hover:text-[var(--primary)] dark:text-slate-400 dark:hover:text-indigo-400 inline-flex items-center gap-1 cursor-pointer transition-colors"
-                        title="Edit Subject Name (Allowed because no notes uploaded)"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>Edit Subject</span>
-                      </button>
-                    )}
-
+                     
                     <button
                       onClick={() => {
                         const courseParam = selectedCourse?.slug || selectedCourse?.name || '';
@@ -578,21 +562,7 @@ export const SemesterPage = () => {
                 ) : (
                   <div className="py-4 text-center text-xs text-slate-400 dark:text-slate-500 space-y-2">
                     <p className="italic">No notes uploaded for this subject yet.</p>
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => {
-                          const courseParam = selectedCourse?.slug || selectedCourse?.name || '';
-                          const currentSemNumber = currentSemester?.semesterNumber || semesterParam || 1;
-                          navigate(
-                            `/student/add-notes?step=3&course=${encodeURIComponent(courseParam)}&semester=${encodeURIComponent(currentSemNumber)}&editSubjectId=${encodeURIComponent(sub._id)}&returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`
-                          );
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>Edit Subject Name</span>
-                      </button>
-                    </div>
+                     
                   </div>
                 )}
               </div>

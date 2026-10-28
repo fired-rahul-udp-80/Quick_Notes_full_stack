@@ -420,7 +420,17 @@ export const AddSubjectForm = () => {
                 {activeSubjects.map((sub) => {
                   const isSelected = sub._id === selectedSubjectId;
                   const hasLectures = typeof sub.lectureCount === 'number';
-                  const hasNotes = typeof sub.noteCount === 'number';
+
+                  // Total notes uploaded across ALL students for this subject
+                  const totalNotes =
+                    typeof sub.totalNoteCount === 'number'
+                      ? sub.totalNoteCount
+                      : typeof sub.noteCount === 'number'
+                      ? sub.noteCount
+                      : 0;
+
+                  // Edit button is strictly shown ONLY when 0 notes have been uploaded by ANY student
+                  const canEdit = totalNotes === 0;
 
                   return (
                     <div
@@ -437,7 +447,7 @@ export const AddSubjectForm = () => {
                           {sub.subjectCode || 'SUB'}
                         </span>
                         <div className="flex items-center gap-1.5">
-                          {sub.noteCount === 0 && (
+                          {canEdit && (
                             <button
                               type="button"
                               onClick={(e) => {
@@ -449,7 +459,7 @@ export const AddSubjectForm = () => {
                                 });
                               }}
                               className="p-1 rounded text-slate-400 hover:text-[var(--primary)] dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                              title="Edit Subject Name (0 notes uploaded)"
+                              title="Edit Subject Name (0 notes uploaded by any student)"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
                             </button>
@@ -459,14 +469,12 @@ export const AddSubjectForm = () => {
                       </div>
                       <div className="text-sm font-bold text-slate-900 dark:text-slate-100 line-clamp-1">{sub.name}</div>
 
-                      {/* Display counts only when supplied by the API */}
-                      {(hasLectures || hasNotes) && (
-                        <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1.5">
-                          {hasLectures && <span>{sub.lectureCount} lectures</span>}
-                          {hasLectures && hasNotes && <span>•</span>}
-                          {hasNotes && <span>{sub.noteCount} notes</span>}
-                        </div>
-                      )}
+                      {/* Display counts: Accurate total notes uploaded across all students */}
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1.5">
+                        {hasLectures && <span>{sub.lectureCount} lectures</span>}
+                        {hasLectures && <span>•</span>}
+                        <span>{totalNotes} {totalNotes === 1 ? 'note' : 'notes'}</span>
+                      </div>
                     </div>
                   );
                 })}

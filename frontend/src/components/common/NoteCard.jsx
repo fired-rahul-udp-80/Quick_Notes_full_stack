@@ -7,7 +7,6 @@ export const NoteCard = ({
   note,
   onOpen,
   showActions = true,
-  onDelete,
   className = ''
 }) => {
   const navigate = useNavigate();
@@ -127,18 +126,7 @@ export const NoteCard = ({
             >
               Read
             </button>
-            {onDelete && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(note.id);
-                }}
-                title="Delete note"
-                className="p-1 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            )}
+            
           </div>
         )}
       </div>

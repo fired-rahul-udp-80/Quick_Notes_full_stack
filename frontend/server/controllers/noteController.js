@@ -334,9 +334,18 @@ const getPublicNotes = async (req, res) => {
     // Allow exploring notes across all users (explore catalog), excluding ARCHIVED notes
     filter.status = { $ne: 'ARCHIVED' };
 
-    // If explicit visibility is filtered by client query (e.g., ?visibility=PUBLIC)
-    if (visibilityQuery && ['PUBLIC', 'ENROLLED', 'PRIVATE'].includes(visibilityQuery.toUpperCase())) {
-      filter.visibility = visibilityQuery.toUpperCase();
+    // Public notes API must NEVER return PRIVATE notes
+    if (visibilityQuery) {
+      const normalizedVisibility = visibilityQuery.toUpperCase();
+      if (normalizedVisibility === 'PUBLIC' || normalizedVisibility === 'ENROLLED') {
+        filter.visibility = normalizedVisibility;
+      } else {
+        // If client explicitly queries PRIVATE (or invalid value) on public API, return no records
+        filter.visibility = { $in: [] };
+      }
+    } else {
+      // By default, exclude all PRIVATE notes from public API
+      filter.visibility = { $ne: 'PRIVATE' };
     }
 
     if (course && isValidObjectId(course)) {

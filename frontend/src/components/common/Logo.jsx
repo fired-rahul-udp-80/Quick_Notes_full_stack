@@ -19,7 +19,7 @@ export const Logo = ({ size = 'md', className = '', onClick }) => {
         <span className={`font-bold tracking-tight text-slate-900 dark:text-white ${
           isLarge ? 'text-2xl leading-none' : isSmall ? 'text-base leading-none' : 'text-lg leading-tight'
         }`}>
-          NIU <span className="text-primary dark:text-primary">Notes</span>
+          Quick NIU <span className="text-primary dark:text-primary">Notes</span>
         </span>
         {isLarge && (
           <span className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 tracking-normal">

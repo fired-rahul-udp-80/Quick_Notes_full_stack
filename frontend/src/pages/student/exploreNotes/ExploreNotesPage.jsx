@@ -32,9 +32,6 @@ export const ExploreNotesPage = () => {
   const savedNoteIds = useSelector(selectSavedNoteIds);
   const filteredNotes = useSelector(selectFilteredExploreNotes);
 
-  // Active Note Modal Preview State
-  const [selectedNote, setSelectedNote] = useState(null);
-
   // Fetch explore catalog on mount
   const [refreshing, setRefreshing] = useState(false);
 
@@ -42,7 +39,6 @@ export const ExploreNotesPage = () => {
     setRefreshing(true);
     try {
       await dispatch(fetchExploreData()).unwrap();
-      toast.success('Explore notes refreshed');
     } catch (err) {
       toast.error('Failed to refresh explore notes');
     } finally {
@@ -176,7 +172,7 @@ export const ExploreNotesPage = () => {
                 onBookmarkToggle={handleBookmarkToggle}
                 onSelectNote={(selected) => {
                   if (isOwner) {
-                    navigate('/explore/preview', {
+                    navigate('/student/explore/preview', {
                       state: { note: selected, isOwner: true }
                     });
                   } else if (isEnrolled) {
@@ -184,7 +180,7 @@ export const ExploreNotesPage = () => {
                       state: { note: selected, noteId }
                     });
                   } else {
-                    navigate('/explore/preview', { state: { note: selected } });
+                    navigate('/student/explore/preview', { state: { note: selected } });
                   }
                 }}
               />

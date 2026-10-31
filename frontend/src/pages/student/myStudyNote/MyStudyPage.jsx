@@ -204,7 +204,14 @@ export const MyStudyPage = () => {
           <span className="text-xs text-slate-400 dark:text-slate-500">Click a semester to open notes</span>
         </div>
 
-        {myCourses.length === 0 ? (
+        {loading? (
+          <div className="py-20 text-center space-y-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
+            <div className=" mx-auto" />
+            <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+              Loading your notes and semesters...
+            </p>
+          </div>
+        ) : myCourses.length === 0 ? (
           <div className="p-10 text-center bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 space-y-3">
             <Calendar className="w-9 h-9 text-slate-300 dark:text-slate-600 mx-auto" />
             <div className="space-y-1">

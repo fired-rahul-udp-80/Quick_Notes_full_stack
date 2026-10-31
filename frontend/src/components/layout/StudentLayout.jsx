@@ -5,7 +5,7 @@ import { Logo } from '../common/Logo';
 import { logout as logoutAction } from '../../store/slices/authSlice';
 import { toggleTheme, selectThemeMode } from '../../store/slices/themeSlice';
 import { authApi } from '../../services/authApi';
-import { CURRENT_STUDENT } from '../../data/mockData';
+ 
 import {
   LayoutDashboard,
   GraduationCap,
@@ -24,6 +24,7 @@ import {
   Sun,
   Moon,
   RefreshCw,
+  Video,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { fetchMyCourses } from '../../store/slices/courseSlice';
@@ -40,6 +41,7 @@ import {
   selectEnrolledCourseIds,
   fetchExploreData,
 } from '../../store/slices/exploreSlice';
+import { fetchDashboardStats } from '../../store/slices/dashboardSlice';
 import { ExploreFilterBar } from '../student/exploreNotes/ExploreFilterBar';
 
 export const StudentLayout = ({ children }) => {
@@ -64,38 +66,37 @@ export const StudentLayout = ({ children }) => {
     }
   }, [dispatch, courses]);
 
-  // Navigate to /explore when user searches or filters from another page
+  // Navigate to /student/explore when user searches or filters from another page
   const handleSearchChange = (val) => {
     dispatch(setSearchQuery(val));
-    if (location.pathname !== '/explore' && val.trim().length > 0) {
-      navigate('/explore');
+    if (location.pathname !== '/student/explore' && val.trim().length > 0) {
+      navigate('/student/explore');
     }
   };
 
   const handleCourseChange = (val) => {
     dispatch(setSelectedCourseId(val));
-    if (location.pathname !== '/explore') {
-      navigate('/explore');
+    if (location.pathname !== '/student/explore') {
+      navigate('/student/explore');
     }
   };
 
   const handleSemesterChange = (val) => {
     dispatch(setSelectedSemesterNum(val));
-    if (location.pathname !== '/explore') {
-      navigate('/explore');
+    if (location.pathname !== '/student/explore') {
+      navigate('/student/explore');
     }
   };
 
   const handleSortChange = (val) => {
     dispatch(setSortBy(val));
-    if (location.pathname !== '/explore') {
-      navigate('/explore');
+    if (location.pathname !== '/student/explore') {
+      navigate('/student/explore');
     }
   };
 
 
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [globalRefreshing, setGlobalRefreshing] = useState(false);
 
@@ -106,9 +107,11 @@ export const StudentLayout = ({ children }) => {
       const promises = [dispatch(fetchExploreData())];
       if (
         location.pathname.startsWith('/student/my-study') ||
-        location.pathname.startsWith('/student/add-notes')
+        location.pathname.startsWith('/student/add-notes') ||
+        location.pathname.startsWith('/student/dashboard')
       ) {
         promises.push(dispatch(fetchMyCourses()));
+        promises.push(dispatch(fetchDashboardStats()));
       }
       await Promise.allSettled(promises);
       toast.success('Page refreshed');
@@ -125,10 +128,11 @@ export const StudentLayout = ({ children }) => {
     { id: '/student/my-study', label: 'My Study', icon: GraduationCap },
     { id: '/student/saved-notes', label: 'Saved Notes', icon: Bookmark, badge: savedNoteIds.length },
     { id: '/student/enrolled-notes', label: 'Enrolled Notes', icon: BookMarked, badge: enrolledCourseIds.length },
+    { id: '/student/meetings', label: 'Study Rooms', icon: Video },
   ];
 
   const exploreNavItems = [
-    { id: '/explore', label: 'Explore Notes', icon: Compass },
+    { id: '/student/explore', label: 'Explore Notes', icon: Compass },
   ];
 
  
@@ -142,7 +146,7 @@ export const StudentLayout = ({ children }) => {
       await authApi.logout();
     } finally {
       dispatch(logoutAction());
-      navigate('/login');
+      navigate('/');
     }
   };
 
@@ -152,7 +156,7 @@ export const StudentLayout = ({ children }) => {
       <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 sticky top-0 h-screen shrink-0 z-30 select-none transition-colors duration-200">
         {/* Brand Header */}
         <div className="h-16 px-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-          <Logo onClick={() => navigate('/student/dashboard')} />
+          <Logo onClick={() => navigate('/')} />
         </div>
 
         {/* Sidebar Nav Items */}

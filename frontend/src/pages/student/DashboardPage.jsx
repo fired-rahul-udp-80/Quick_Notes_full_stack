@@ -1,69 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchDashboardStats } from '../../store/slices/dashboardSlice';
 import { NoteCard } from '../../components/common/NoteCard';
 import { DashboardStats } from '../../components/student/dashboard/DashboardStats';
 import { StreakCalendar } from '../../components/student/dashboard/StreakCalendar';
-import { dashboardApi } from '../../services/dashboardApi';
 import { CURRENT_STUDENT } from '../../data/mockData';
 import { FileText, Plus, ArrowRight, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const { user: authUser } = useSelector((state) => state.auth);
   const user = authUser || CURRENT_STUDENT;
 
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [dashboardData, setDashboardData] = useState({
-    stats: {
-      myNotesCount: 0,
-      enrolledCoursesCount: 0,
-      savedNotesCount: 0,
-      notesReadCount: 0,
-    },
-    streak: {
-      currentStreak: 1,
-      longestStreak: 1,
-      activeDates: [],
-    },
-    recentNotes: [],
-  });
-
-  const fetchDashboard = async (isManual = false) => {
-    try {
-      if (isManual) setRefreshing(true);
-      else setLoading(true);
-
-      const res = await dashboardApi.getStudentStats();
-      if (res && res.success && res.data) {
-        setDashboardData(res.data);
-        if (isManual) toast.success('Dashboard refreshed');
-      }
-    } catch (err) {
-      console.error('Failed to fetch dashboard statistics:', err);
-      if (isManual) toast.error('Failed to refresh dashboard');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+  const { stats, streak, recentNotes, loading } = useSelector((state) => state.dashboard);
 
   useEffect(() => {
-    fetchDashboard(false);
+    dispatch(fetchDashboardStats());
+  }, [dispatch]);
 
-    const handleAppRefresh = () => fetchDashboard(true);
-    window.addEventListener('app:refresh', handleAppRefresh);
-    return () => window.removeEventListener('app:refresh', handleAppRefresh);
-  }, []);
-
-  const handleRefresh = () => {
-    fetchDashboard(true);
+  const handleRefresh = async () => {
+    try {
+      await dispatch(fetchDashboardStats()).unwrap();
+    } catch {
+      toast.error('Failed to refresh dashboard');
+    }
   };
-
-  const recentNotes = dashboardData.recentNotes || [];
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -79,17 +44,17 @@ export const DashboardPage = () => {
         </div>
         <button
           onClick={handleRefresh}
-          disabled={refreshing}
-          className="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-[var(--primary)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+          disabled={loading}
+          className="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-[var(--primary)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs disabled:opacity-50"
           title="Refresh dashboard stats"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-[var(--primary)]' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[var(--primary)]' : ''}`} />
           <span>Refresh</span>
         </button>
       </div>
 
       {/* 1. Connected Backend Stats Cards */}
-      <DashboardStats stats={dashboardData.stats} loading={loading} />
+      <DashboardStats stats={stats} loading={loading} />
       <div className='grid grid-cols-12 gap-4'>
         {/* 2. Recent Notes Section */}
           <div className="space-y-4 col-span-12 xl:col-span-8">
@@ -109,7 +74,12 @@ export const DashboardPage = () => {
               </button>
             </div>
 
-            {recentNotes.length === 0 ? (
+            {loading ? (
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 text-center space-y-3 rounded-lg">
+                <div className="loader mx-auto" />
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Loading recent notes...</p>
+              </div>
+            ) : recentNotes.length === 0 ? (
               <div className="bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center space-y-3">
                 <FileText className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
                 <div className="space-y-1">
@@ -139,7 +109,6 @@ export const DashboardPage = () => {
                       owner: note.owner?.name || user?.name || 'Student',
                       uploadedAt: note.createdAt,
                     }}
-                     
                   />
                 ))}
               </div>
@@ -147,7 +116,7 @@ export const DashboardPage = () => {
           </div>
         {/* Right Column (4 cols on 2nd right side): Daily Streak Calendar */}
         <div className="col-span-12 xl:col-span-4">
-          <StreakCalendar streak={dashboardData.streak} />
+          <StreakCalendar streak={streak} />
         </div>
       </div>
     </div>

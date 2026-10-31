@@ -101,6 +101,7 @@ const initialState = {
   selectedCourse: null,
   selectedSemester: null,
   selectedSubject: null,
+  loading: false,
 
   // Stepper state (1: Course, 2: Semester, 3: Subject)
   currentStep: 1,

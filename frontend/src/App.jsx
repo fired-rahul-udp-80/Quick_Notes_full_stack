@@ -56,7 +56,7 @@ function AppContent() {
     // Proactively refresh access token every 12 minutes (access token expires in 15m)
     // Keeps the session alive so user never gets logged out on dashboard
     const refreshInterval = setInterval(async () => {
-      try {
+      try { 
         await authApi.refreshToken();
       } catch (e) {
         // Silent background refresh
@@ -75,9 +75,9 @@ function AppContent() {
       <Toaster
         toastOptions={{
           style: themeMode === 'dark' ? {
-            background: '#1e293b',
+            background: 'rgb(13, 12, 12)',
             color: '#f8fafc',
-            border: '1px solid #334155',
+            border: '1px solid rgb(13, 12, 12)',
           } : undefined,
         }}
       />

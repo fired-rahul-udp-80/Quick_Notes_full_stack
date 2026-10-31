@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Navbar } from '../../components/layout/Navbar';
 import { Footer } from '../../components/layout/Footer';
 import { Breadcrumb } from '../../components/common/Breadcrumb';
 import { NoteCard } from '../../components/common/NoteCard';
+import { academicApi } from '../../services/academicApi';
+import { noteApi } from '../../services/noteApi';
 import { toast } from 'react-hot-toast';
 import {
   BookOpen,
+  GraduationCap,
   Users,
   FileText,
   Layers,
@@ -16,253 +19,517 @@ import {
   Sparkles,
   ArrowRight,
   ShieldCheck,
-  ChevronRight
+  Search,
+  RefreshCw,
+  X,
+  Compass,
+  ChevronRight,
+  Calendar
 } from 'lucide-react';
-
-const DEFAULT_COURSE = {
-  id: 'course-cpp',
-  title: 'C++ Programming & OOP Architecture',
-  program: 'B.Tech CSE / BCA',
-  category: 'Core Curriculum',
-  description: 'Master C++ from fundamental syntax and pointers to object-oriented programming, standard template library (STL), memory management, and competitive problem-solving patterns.',
-  notesCount: 124,
-  topicsCount: 7,
-  enrolledStudents: 340,
-  instructor: 'School of Computer Science & Engineering',
-  syllabus: [
-    { title: 'C++ Basics & Syntax', notes: 14, topics: 'Variables, datatypes, control flow, functions' },
-    { title: 'Object Oriented Programming (OOP)', notes: 22, topics: 'Classes, objects, constructor types, destructor' },
-    { title: 'Classes & Objects in Depth', notes: 18, topics: 'Access specifiers, friend functions, static members' },
-    { title: 'Inheritance & Ambiguity Resolution', notes: 16, topics: 'Single, multiple, multilevel, virtual base classes' },
-    { title: 'Polymorphism & Virtual Functions', notes: 20, topics: 'Function overriding, dynamic dispatch, vtable, pure virtual' },
-    { title: 'Standard Template Library (STL)', notes: 24, topics: 'Vectors, lists, maps, iterators, algorithms' },
-    { title: 'Exception Handling & File Streams', notes: 10, topics: 'Try-catch blocks, custom exceptions, fstream' }
-  ]
-};
-
-const SAMPLE_NOTES = [
-  {
-    id: 'sample-1',
-    title: 'C++ Operator Overloading & Precedence',
-    description: 'Detailed class lecture summary covering unary and binary operator overloading, friend functions, and syntax rules.',
-    subject: 'Programming in C++',
-    course: 'B.Tech CSE',
-    fileType: 'PDF',
-    visibility: 'PUBLIC',
-    pages: 14,
-    owner: { name: 'Rahul Kumar' }
-  },
-  {
-    id: 'sample-2',
-    title: 'Virtual Functions & Polymorphism Cheat Sheet',
-    description: 'Concise revision notes on runtime polymorphism, vptr, vtable mechanism, and pure virtual abstract classes.',
-    subject: 'Programming in C++',
-    course: 'B.Tech CSE',
-    fileType: 'PDF',
-    visibility: 'PUBLIC',
-    pages: 8,
-    owner: { name: 'Aman Verma' }
-  }
-];
 
 export const CourseDetailsPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated } = useSelector((state) => state.auth);
-  const [isEnrolled, setIsEnrolled] = useState(false);
 
-  const activeCourse = DEFAULT_COURSE;
+  const [courses, setCourses] = useState([]);
+  const [allNotes, setAllNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState('ALL'); // 'ALL' | 'ACADEMIC' | 'SKILL'
 
-  const handleEnrollToggle = () => {
-    if (!isAuthenticated) {
-      toast('Please sign in to save this course to your dashboard', { icon: 'ℹ️' });
-      navigate('/login');
+  // Selected course details
+  const [selectedCourseId, setSelectedCourseId] = useState(searchParams.get('courseId') || null);
+  const [courseSemesters, setCourseSemesters] = useState([]);
+  const [loadingSemesters, setLoadingSemesters] = useState(false);
+
+  // Fetch all courses and notes from backend
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [coursesRes, notesRes] = await Promise.allSettled([
+        academicApi.getAllCourses({ all: 'true' }),
+        noteApi.getPublicNotes({ all: 'true' })
+      ]);
+
+      const fetchedCourses =
+        coursesRes.status === 'fulfilled' && coursesRes.value?.success && Array.isArray(coursesRes.value.data)
+          ? coursesRes.value.data
+          : [];
+
+      const fetchedNotes =
+        notesRes.status === 'fulfilled' && notesRes.value?.success && Array.isArray(notesRes.value.data)
+          ? notesRes.value.data
+          : [];
+
+      setCourses(fetchedCourses);
+      setAllNotes(fetchedNotes);
+
+      // Default select the first course or from URL param if available
+      const paramId = searchParams.get('courseId');
+      if (paramId && fetchedCourses.some((c) => String(c._id || c.id) === String(paramId))) {
+        setSelectedCourseId(paramId);
+      } else if (fetchedCourses.length > 0 && !selectedCourseId) {
+        setSelectedCourseId(fetchedCourses[0]._id || fetchedCourses[0].id);
+      }
+    } catch (err) {
+      console.error('Error loading courses:', err);
+      toast.error('Failed to load courses');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Fetch semesters whenever selected course changes
+  useEffect(() => {
+    if (!selectedCourseId) {
+      setCourseSemesters([]);
       return;
     }
-    setIsEnrolled((prev) => {
-      const next = !prev;
-      toast.success(next ? 'Enrolled successfully! Added to your dashboard.' : 'Unenrolled from course');
-      return next;
+
+    let isMounted = true;
+    const fetchSemesters = async () => {
+      setLoadingSemesters(true);
+      try {
+        const res = await academicApi.getSemestersByCourse(selectedCourseId);
+        if (isMounted) {
+          if (res && res.success && Array.isArray(res.data)) {
+            setCourseSemesters(res.data);
+          } else {
+            setCourseSemesters([]);
+          }
+        }
+      } catch (err) {
+        console.warn('Could not load semesters for course:', err);
+        if (isMounted) setCourseSemesters([]);
+      } finally {
+        if (isMounted) setLoadingSemesters(false);
+      }
+    };
+
+    fetchSemesters();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCourseId]);
+
+  // Compute notes count map per course
+  const notesCountMap = useMemo(() => {
+    const counts = {};
+    allNotes.forEach((n) => {
+      const cId = typeof n.course === 'object' && n.course !== null ? n.course._id || n.course.id : n.course;
+      if (cId) {
+        counts[cId] = (counts[cId] || 0) + 1;
+      }
     });
+    return counts;
+  }, [allNotes]);
+
+  // Filter courses based on search and type
+  const filteredCourses = useMemo(() => {
+    let list = [...courses];
+
+    if (filterType !== 'ALL') {
+      list = list.filter((c) => (c.courseType || 'ACADEMIC').toUpperCase() === filterType);
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(
+        (c) =>
+          (c.name || '').toLowerCase().includes(q) ||
+          (c.slug || '').toLowerCase().includes(q) ||
+          (c.courseType || '').toLowerCase().includes(q)
+      );
+    }
+
+    return list;
+  }, [courses, filterType, searchQuery]);
+
+  // Active selected course object
+  const activeCourse = useMemo(() => {
+    if (!selectedCourseId) return courses[0] || null;
+    return courses.find((c) => String(c._id || c.id) === String(selectedCourseId)) || courses[0] || null;
+  }, [courses, selectedCourseId]);
+
+  // Notes belonging to active selected course
+  const activeCourseNotes = useMemo(() => {
+    if (!activeCourse) return [];
+    const activeId = String(activeCourse._id || activeCourse.id);
+    return allNotes.filter((n) => {
+      const cId = typeof n.course === 'object' && n.course !== null ? n.course._id || n.course.id : n.course;
+      return String(cId) === activeId;
+    });
+  }, [allNotes, activeCourse]);
+
+  const handleSelectCourse = (course) => {
+    const id = course._id || course.id;
+    setSelectedCourseId(id);
+    setSearchParams({ courseId: id });
+    window.scrollTo({ top: 320, behavior: 'smooth' });
+  };
+
+  const handleNoteClick = (note) => {
+    if (!isAuthenticated) {
+      toast('Please log in to access notes');
+      navigate('/login', {
+        state: {
+          from: '/course-details',
+          noteId: note._id || note.id
+        }
+      });
+    } else {
+      navigate(`/student/explore`);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/70 dark:bg-[#07080b]/90 square-grid-pattern text-slate-900 dark:text-slate-100 flex flex-col antialiased transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col antialiased transition-colors duration-200">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      {/* Hero Header Section */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white py-10 sm:py-14 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-6xl mx-auto relative z-10 text-center space-y-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
+            Explore All Courses & Degree Tracks
+          </h1>
+
+          <p className="max-w-2xl mx-auto text-slate-300 text-sm sm:text-base leading-relaxed">
+            Browse verified courses from the curriculum. Explore structured semesters, modules,
+            and shared student notes for every degree program.
+          </p>
+
+          {/* Search bar inside Hero */}
+          <div className="max-w-4xl mx-auto pt-2">
+            <div className="relative flex items-center">
+              <Search className="w-4 h-4 text-slate-400 absolute left-4 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search courses by name or keyword..."
+                className="w-full pl-11 pr-10 py-3 bg-slate-800/90 text-white placeholder:text-slate-400 border border-slate-700 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm transition-all"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 p-1 text-slate-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content Area */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+        {/* Navigation Breadcrumb */}
         <Breadcrumb
           items={[
             { label: 'Explore Notes', onClick: () => navigate('/explore') },
-            { label: activeCourse.title }
+            { label: 'All Courses', onClick: () => setSelectedCourseId(null) },
+            ...(activeCourse ? [{ label: activeCourse.name }] : [])
           ]}
         />
 
-        {/* Hero Card */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 shadow-xs">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div className="space-y-3 max-w-2xl">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary-light text-primary-dark dark:bg-primary-dark/40 dark:text-yellow-200 border border-primary-border/60 dark:border-primary/40">
-                  {activeCourse.program}
-                </span>
-                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                  {activeCourse.category}
-                </span>
-                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  Verified Study Track
-                </span>
-              </div>
-
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                {activeCourse.title}
-              </h1>
-
-              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
-                {activeCourse.description}
-              </p>
-
-              {/* Course Meta Stats */}
-              <div className="flex items-center gap-6 pt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium flex-wrap">
-                <div className="flex items-center gap-1.5">
-                  <FileText className="w-4 h-4 text-primary dark:text-yellow-300" />
-                  <span><strong className="text-slate-900 dark:text-white">{activeCourse.notesCount}</strong> Notes</span>
+        {/* Selected Course Overview Hero Card (if active) */}
+        {activeCourse && (
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-6">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+              <div className="space-y-3 max-w-3xl">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-3 py-1 text-xs font-bold bg-primary-light text-primary-dark dark:bg-primary-dark/40 dark:text-yellow-200 border border-primary-border/60 dark:border-primary/40">
+                    {activeCourse.courseType || 'ACADEMIC'}
+                  </span>
+                  {activeCourse.isPublished && (
+                    <span className="px-3 py-1 text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      Active Track
+                    </span>
+                  )}
+                  {activeCourse.slug && (
+                    <span className="text-xs font-mono text-slate-400 dark:text-slate-500">
+                      /{activeCourse.slug}
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Layers className="w-4 h-4 text-primary dark:text-yellow-300" />
-                  <span><strong className="text-slate-900 dark:text-white">{activeCourse.topicsCount}</strong> Modules</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Users className="w-4 h-4 text-primary dark:text-yellow-300" />
-                  <span><strong className="text-slate-900 dark:text-white">{activeCourse.enrolledStudents}</strong> Students</span>
-                </div>
-              </div>
-            </div>
 
-            {/* CTA Box */}
-            <div className="w-full lg:w-auto p-5 bg-slate-50 dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col gap-3 shrink-0 text-center lg:text-left min-w-[240px]">
-              <div className="text-xs text-slate-500 dark:text-slate-400">Self-Paced Academic Study</div>
-              <div className="text-2xl font-bold text-slate-900 dark:text-white">100% Free</div>
-              <button
-                type="button"
-                onClick={handleEnrollToggle}
-                className={`w-full py-3 px-5 text-sm font-semibold rounded-xl transition-all cursor-pointer shadow-xs ${
-                  isEnrolled
-                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                    : 'bg-primary hover:bg-primary-hover text-white'
-                }`}
-              >
-                {isEnrolled ? '✓ Enrolled in Dashboard' : 'Enroll for Free'}
-              </button>
-              <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                {isEnrolled ? 'Access anytime from your Enrolled Courses' : 'Instant access • No fees or credit card required'}
-              </p>
-            </div>
-          </div>
-        </div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  {activeCourse.name}
+                </h2>
 
-        {/* Course Structure / Syllabus */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-6 shadow-xs space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Course Structure & Curriculum</h3>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{activeCourse.syllabus.length} Modules</span>
-              </div>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Comprehensive academic curriculum for {activeCourse.name}. Review available semester syllabi,
+                  lecture notes, and study guides prepared by students and faculty.
+                </p>
 
-              <div className="space-y-3">
-                {activeCourse.syllabus.map((module, idx) => (
-                  <div
-                    key={idx}
-                    className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-start justify-between gap-4"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-lg bg-primary-light text-primary-dark dark:bg-primary-dark/40 dark:text-yellow-200 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
-                        {idx + 1}
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">{module.title}</h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{module.topics}</p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0 bg-white dark:bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-800">
-                      {module.notes} Notes
+                {/* Course Quick Stats */}
+                <div className="flex items-center gap-6 pt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium flex-wrap">
+                  <div className="flex items-center gap-1.5">
+                    <FileText className="w-4 h-4 text-primary" />
+                    <span>
+                      <strong className="text-slate-900 dark:text-white">
+                        {notesCountMap[activeCourse._id || activeCourse.id] || 0}
+                      </strong>{' '}
+                      Study Notes
                     </span>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Public Note Preview Section */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-6 shadow-xs space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Sample Public Notes</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Preview and read study material from this course before or without enrolling.
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4 text-primary" />
+                    <span>
+                      <strong className="text-slate-900 dark:text-white">
+                        {courseSemesters.length || 0}
+                      </strong>{' '}
+                      Semesters
+                    </span>
+                  </div>
                 </div>
-                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-200/60 dark:border-emerald-800">
-                  Free Preview
-                </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {SAMPLE_NOTES.map((note) => (
-                  <NoteCard
-                    key={note.id}
-                    note={note}
-                    onOpen={() => navigate('/explore')}
-                  />
-                ))}
+              {/* Action Button */}
+              <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full lg:w-auto">
+                <button
+                  type="button"
+                  onClick={() => navigate('/explore')}
+                  className="w-full sm:w-auto px-6 py-3 bg-primary hover:bg-primary-hover text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Compass className="w-4 h-4" />
+                  <span>Explore Notes Catalog</span>
+                </button>
               </div>
             </div>
+
+            {/* Semesters / Modules Tabs or Cards for Active Course */}
+            {courseSemesters.length > 0 && (
+              <div className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                  <Layers className="w-3.5 h-3.5 text-primary" />
+                  <span>Curriculum Semesters</span>
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2.5">
+                  {courseSemesters.map((sem) => (
+                    <div
+                      key={sem._id || sem.id}
+                      className="p-3 text-center border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 hover:border-primary/50 transition-all"
+                    >
+                      <div className="text-[10px] font-bold text-slate-400 uppercase">Sem</div>
+                      <div className="text-base font-extrabold text-slate-800 dark:text-slate-200">
+                        {sem.semesterNumber || sem.name}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+        )}
 
-          {/* Right Info Box */}
-          <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-6 shadow-xs space-y-4">
-              <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">About this Study Track</h4>
-              <div className="space-y-3 text-xs text-slate-600 dark:text-slate-400">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Curated by senior university scholars</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Covers mid-term & end-term syllabi</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Downloadable PDF format ready</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>Includes exam-oriented problem questions</span>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-                <div className="text-xs text-slate-400 dark:text-slate-500 mb-1">Instructor / Curator</div>
-                <div className="text-xs font-bold text-slate-800 dark:text-slate-200">{activeCourse.instructor}</div>
-              </div>
+        {/* ==================================================== */}
+        {/* ALL COURSES SECTION (From Course Model) */}
+        {/* ==================================================== */}
+        <section className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-primary" />
+                <span>All Degree Courses ({filteredCourses.length})</span>
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Select any course to view its curriculum, semesters, and notes.
+              </p>
             </div>
 
-            <div className="bg-primary-light/50 dark:bg-slate-850 rounded-2xl border border-primary-border/60 dark:border-slate-800 p-5 text-xs text-slate-700 dark:text-slate-300 space-y-2">
-              <div className="font-bold text-slate-900 dark:text-slate-100">Need personal organization?</div>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                Add this course to your student dashboard to track saved handouts across lectures.
-              </p>
+            {/* Filter Tabs */}
+            <div className="flex items-center gap-1.5 p-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
               <button
                 type="button"
-                onClick={handleEnrollToggle}
-                className="mt-2 inline-flex items-center gap-1.5 font-bold text-primary dark:text-yellow-300 hover:underline cursor-pointer"
+                onClick={() => setFilterType('ALL')}
+                className={`px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  filterType === 'ALL'
+                    ? 'bg-primary text-slate-950 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
               >
-                <span>{isEnrolled ? 'View in Dashboard →' : 'Enroll Now →'}</span>
+                All
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterType('ACADEMIC')}
+                className={`px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  filterType === 'ACADEMIC'
+                    ? 'bg-primary text-slate-950 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
+              >
+                Academic
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterType('SKILL')}
+                className={`px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  filterType === 'SKILL'
+                    ? 'bg-primary text-slate-950 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
+              >
+                Skill Based
               </button>
             </div>
           </div>
-        </div>
+
+          {/* Loading Skeleton */}
+          {loading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 space-y-4 animate-pulse"
+                >
+                  <div className="h-4 w-20 bg-slate-200 dark:bg-slate-800" />
+                  <div className="h-6 w-3/4 bg-slate-200 dark:bg-slate-800" />
+                  <div className="h-4 w-1/2 bg-slate-100 dark:bg-slate-800/60" />
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between">
+                    <div className="h-4 w-24 bg-slate-200 dark:bg-slate-800" />
+                    <div className="h-4 w-16 bg-slate-200 dark:bg-slate-800" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && filteredCourses.length === 0 && (
+            <div className="p-12 text-center bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-3">
+              <BookOpen className="w-10 h-10 text-primary mx-auto opacity-50" />
+              <h3 className="font-bold text-base text-slate-800 dark:text-slate-200">
+                No courses match your criteria
+              </h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Try searching with another keyword or resetting the category filter.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  setFilterType('ALL');
+                }}
+                className="px-4 py-2 bg-primary hover:bg-primary-hover text-slate-950 font-bold text-xs transition-colors cursor-pointer"
+              >
+                Reset Filters
+              </button>
+            </div>
+          )}
+
+          {/* Courses Grid */}
+          {!loading && filteredCourses.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filteredCourses.map((course) => {
+                const cId = course._id || course.id;
+                const isSelected = activeCourse && String(activeCourse._id || activeCourse.id) === String(cId);
+                const count = notesCountMap[cId] || 0;
+
+                return (
+                  <div
+                    key={cId}
+                    onClick={() => handleSelectCourse(course)}
+                    className={`group bg-white dark:bg-slate-900 border p-6 flex flex-col justify-between transition-all duration-200 cursor-pointer shadow-xs hover:shadow-md ${
+                      isSelected
+                        ? 'border-primary ring-2 ring-primary/40 bg-primary/5 dark:bg-primary/5'
+                        : 'border-slate-200/80 dark:border-slate-800 hover:border-primary/60'
+                    }`}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="px-2.5 py-0.5 text-[11px] font-bold bg-primary-light text-primary-dark dark:bg-primary-dark/40 dark:text-yellow-200 border border-primary-border/60 dark:border-primary/40">
+                          {course.courseType || 'ACADEMIC'}
+                        </span>
+                        {course.isPublished ? (
+                          <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Verified
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-medium text-slate-400">
+                            Draft Track
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors line-clamp-2">
+                        {course.name}
+                      </h3>
+
+                      {course.slug && (
+                        <p className="text-xs text-slate-400 font-mono">
+                          /{course.slug}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
+                      <div className="flex items-center gap-1.5 font-medium">
+                        <FileText className="w-4 h-4 text-primary" />
+                        <span><strong>{count}</strong> notes</span>
+                      </div>
+
+                      <span className="text-primary font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                        <span>{isSelected ? 'Selected' : 'View Track'}</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        {/* Course Notes Section (if notes exist for active course) */}
+        {activeCourse && activeCourseNotes.length > 0 && (
+          <section className="space-y-4 pt-4 border-t border-slate-200/80 dark:border-slate-800">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  <span>Notes in {activeCourse.name} ({activeCourseNotes.length})</span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Click any note to preview details or log in to download.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => navigate('/explore')}
+                className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+              >
+                <span>View All Notes</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {activeCourseNotes.slice(0, 6).map((note) => (
+                <NoteCard
+                  key={note._id || note.id}
+                  note={note}
+                  onOpen={() => handleNoteClick(note)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
       </main>
 
       <Footer />

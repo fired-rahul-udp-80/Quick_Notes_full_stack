@@ -4,6 +4,7 @@ import courseReducer from './slices/courseSlice';
 import exploreReducer from './slices/exploreSlice';
 import enrolledReducer from './slices/enrolledSlice';
 import themeReducer from './slices/themeSlice';
+import dashboardReducer from './slices/dashboardSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     explore: exploreReducer,
     enrolled: enrolledReducer,
     theme: themeReducer,
+    dashboard: dashboardReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
 });

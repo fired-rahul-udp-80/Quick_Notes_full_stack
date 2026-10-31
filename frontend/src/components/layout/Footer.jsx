@@ -19,7 +19,7 @@ export const Footer = () => {
               Store, organize and explore course-wise notes in one simple study platform designed for university students.
             </p>
             <div className="text-xs text-slate-400 dark:text-slate-500">
-              © {new Date().getFullYear()} NIU Notes. Built for higher education.
+              © {new Date().getFullYear()} Quick NIU Notes. Built for higher education.
             </div>
           </div>
 

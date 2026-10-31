@@ -12,7 +12,8 @@ import { RegisterPage } from '../pages/public/RegisterPage';
 import { VerifyEmailPage } from '../pages/public/VerifyEmailPage';
 import { ForgotPasswordPage } from '../pages/public/ForgotPasswordPage';
 import { ResetPasswordPage } from '../pages/public/ResetPasswordPage';
-import { ExploreNotesPage } from '../pages/student/exploreNotes/ExploreNotesPage';
+import { ExploreNotesPage as StudentExploreNotesPage } from '../pages/student/exploreNotes/ExploreNotesPage';
+import { ExploreNotesPage as PublicExploreNotesPage } from '../pages/public/ExploreNotesPage';
 import { PdfPreViewPage } from '../pages/student/exploreNotes/PdfPreViewPage';
 import { CourseDetailsPage } from '../pages/public/CourseDetailsPage';
  
@@ -32,10 +33,10 @@ import { AdminCoursesPage } from '../pages/admin/AdminCoursesPage';
 import { AdminSubjectsPage } from '../pages/admin/AdminSubjectsPage';
 import { AdminNotesPage } from '../pages/admin/AdminNotesPage';
 import { AddCoursePage } from '../pages/student/addCourses/AddCoursePage';
+import { MeetingLobbyPage } from '../pages/student/meetings/MeetingLobbyPage';
+import { MeetingRoomPage } from '../pages/student/meetings/MeetingRoomPage';
 
-/**
- * ObjectArray storing all application routes
- */
+
 export const routesConfig = [
   // ================= PUBLIC ROUTES =================
   {
@@ -78,33 +79,11 @@ export const routesConfig = [
   },
   {
     path: '/explore',
-    element: (
-      <StudentLayout>
-        <ExploreNotesPage />
-      </StudentLayout>
-    ),
+    element: <PublicExploreNotesPage />,
     isPrivate: false,
+    restrictedForAuth: true,
+    redirectPath: '/student/explore',
     name: 'Explore Notes',
-  },
-  {
-    path: '/explore/preview',
-    element: (
-      <StudentLayout>
-        <PdfPreViewPage />
-      </StudentLayout>
-    ),
-    isPrivate: false,
-    name: 'PDF Preview',
-  },
-  {
-    path: '/explore/preview/:noteId',
-    element: (
-      <StudentLayout>
-        <PdfPreViewPage />
-      </StudentLayout>
-    ),
-    isPrivate: false,
-    name: 'PDF Preview',
   },
   {
     path: '/course-details',
@@ -182,6 +161,28 @@ export const routesConfig = [
     name: 'Enrolled Notes',
   },
   {
+    path: '/student/explore',
+    element: (
+      <StudentLayout>
+        <StudentExploreNotesPage />
+      </StudentLayout>
+    ),
+    isPrivate: true,
+    allowedRoles: ['STUDENT'],
+    name: 'Explore Notes',
+  },
+  {
+    path: '/student/explore/preview',
+    element: (
+      <StudentLayout>
+        <PdfPreViewPage />
+      </StudentLayout>
+    ),
+    isPrivate: true,
+    allowedRoles: ['STUDENT'],
+    name: 'PDF Preview',
+  },
+  {
     path: '/student/settings',
     element: (
       <StudentLayout>
@@ -191,6 +192,24 @@ export const routesConfig = [
     isPrivate: true,
     allowedRoles: ['STUDENT'],
     name: 'Settings',
+  },
+  {
+    path: '/student/meetings',
+    element: (
+      <StudentLayout>
+        <MeetingLobbyPage />
+      </StudentLayout>
+    ),
+    isPrivate: true,
+    allowedRoles: ['STUDENT', 'ADMIN'],
+    name: 'Study Rooms',
+  },
+  {
+    path: '/student/meetings/:roomId',
+    element: <MeetingRoomPage />,
+    isPrivate: true,
+    allowedRoles: ['STUDENT', 'ADMIN'],
+    name: 'Meeting Room',
   },
 
   // ================= ADMIN PRIVATE ROUTES =================

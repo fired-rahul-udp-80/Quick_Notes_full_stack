@@ -11,12 +11,12 @@ export const AppRoutes = () => {
   return (
     <Routes>
       {routesConfig.map((route, index) => {
-        const { path, element, isPrivate, allowedRoles, restrictedForAuth } = route;
+        const { path, element, isPrivate, allowedRoles, restrictedForAuth, redirectPath } = route;
 
         const renderedElement = isPrivate ? (
           <PrivateRoute allowedRoles={allowedRoles}>{element}</PrivateRoute>
         ) : (
-          <PublicRoute restrictedForAuth={restrictedForAuth}>{element}</PublicRoute>
+          <PublicRoute restrictedForAuth={restrictedForAuth} redirectPath={redirectPath}>{element}</PublicRoute>
         );
 
         return <Route key={path || index} path={path} element={renderedElement} />;

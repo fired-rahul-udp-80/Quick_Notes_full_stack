@@ -12,6 +12,7 @@ const {
 
 const {
   authenticate,
+  optionalAuthenticate
 } = require('../middleware/authMiddleware');
 
 // Mount subjects nested under /api/semesters/:semesterId/subjects
@@ -21,12 +22,12 @@ router.use('/:semesterId/subjects', subjectRoutes);
 router
   .route('/')
   .post(authenticate, createSemester)
-  .get(authenticate, getSemestersByCourse);
+  .get(optionalAuthenticate, getSemestersByCourse);
 
 // Direct /api/semesters/:id
 router
   .route('/:id')
-  .get(authenticate, getSemesterById)
+  .get(optionalAuthenticate, getSemesterById)
   .patch(authenticate, updateSemester)
   .delete(authenticate, deleteSemester);
 

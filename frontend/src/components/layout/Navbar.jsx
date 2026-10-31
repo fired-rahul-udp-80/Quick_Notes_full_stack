@@ -23,6 +23,14 @@ export const Navbar = () => {
 
   const dashboardPath = role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard';
 
+  const handleExploreClick = () => {
+    if (isAuthenticated) {
+      navigate('/student/explore');
+    } else {
+      navigate('/explore');
+    }
+  };
+
   return (
     <header className="sticky top-0 z-40 bg-white/90 dark:bg-[#07080b]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -33,7 +41,7 @@ export const Navbar = () => {
         <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600 dark:text-slate-300">
           <button
             type="button"
-            onClick={() => navigate('/explore')}
+            onClick={handleExploreClick}
             className="hover:text-primary dark:hover:text-yellow-300 transition-colors cursor-pointer flex items-center gap-1.5"
           >
             <Compass className="w-4 h-4 text-slate-400 dark:text-slate-500" />
@@ -142,7 +150,7 @@ export const Navbar = () => {
           <button
             type="button"
             onClick={() => {
-              navigate('/explore');
+              handleExploreClick();
               setMobileMenuOpen(false);
             }}
             className="flex items-center gap-2 w-full text-left py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-primary dark:hover:text-yellow-300"
@@ -192,7 +200,7 @@ export const Navbar = () => {
                   navigate('/signup');
                   setMobileMenuOpen(false);
                 }}
-                className="w-full py-2.5 text-center text-sm font-semibold text-white bg-primary hover:bg-primary-hover rounded-xl shadow-xs transition-colors cursor-pointer"
+                className="w-full py-2.5 text-center text-sm font-semibold text-white bg-primary hover:bg-primary-hover transition-colors cursor-pointer"
               >
                 Get Started
               </button>

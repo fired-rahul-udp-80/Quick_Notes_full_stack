@@ -4,9 +4,11 @@ import { useSelector } from 'react-redux';
 
 // Full-screen loading component while checking session
 export const RouteLoader = () => (
-  <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-    <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4" />
-    <p className="text-sm font-semibold text-slate-600">Connecting to Quick Notes...</p>
+  <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4 transition-colors duration-200">
+    <div className="loader mb-5" />
+    <p className="text-sm font-semibold text-slate-600 dark:text-slate-300 tracking-wide">
+      Connecting to Quick NIU Notes...
+    </p>
   </div>
 );
 
@@ -39,14 +41,13 @@ export const PrivateRoute = ({ children, allowedRoles }) => {
  * - If restrictedForAuth is true (e.g. /login, /signup) and user is logged in,
  *   redirects them to their authorized dashboard.
  */
-export const PublicRoute = ({ children, restrictedForAuth = false }) => {
+export const PublicRoute = ({ children, restrictedForAuth = false, redirectPath }) => {
   const { isAuthenticated, isLoading, role } = useSelector((state) => state.auth);
 
-  // if (restrictedForAuth && isLoading) {
-  //   return <RouteLoader />;
-  // }
-
   if (restrictedForAuth && isAuthenticated) {
+    if (redirectPath) {
+      return <Navigate to={redirectPath} replace />;
+    }
     if (role === 'ADMIN') {
       return <Navigate to="/admin/dashboard" replace />;
     }

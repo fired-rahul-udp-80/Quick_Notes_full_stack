@@ -198,3 +198,39 @@ html.dark .square-grid-pattern {
     linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 48px 48px;
 }
+
+/* Theme-Aware Triple-Ring Loader */
+.loader {
+  width: 50px;
+  aspect-ratio: 1;
+  display: grid;
+  border: 4px solid #0000;
+  border-radius: 50%;
+  border-right-color: var(--primary, #887f04);
+  animation: l15 1s infinite linear;
+}
+
+.loader::before,
+.loader::after {    
+  content: "";
+  grid-area: 1/1;
+  margin: 2px;
+  border: inherit;
+  border-radius: 50%;
+  animation: l15 2s infinite;
+}
+
+.loader::after {
+  margin: 8px;
+  animation-duration: 3s;
+}
+
+@keyframes l15 { 
+  100% {
+    transform: rotate(1turn);
+  }
+}
+
+html.dark .loader {
+  border-right-color: #facc15;
+}
